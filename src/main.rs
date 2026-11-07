@@ -86,7 +86,7 @@ enum Comando {
         #[arg(long)]
         sin_plantillas: bool,
     },
-    /// Qué tokens usa cada app incorporada (para la guía de la shell)
+    /// Qué tokens usa cada app incorporada y dónde escribe su tema
     Uso,
     /// Escribe los tokens y su origen, los datos que muestran las guías de color
     Tokens {
@@ -198,7 +198,11 @@ fn run(cli: Cli) -> Result<()> {
                         .into_iter()
                         .map(|(token, count)| (token.to_string(), count.into()))
                         .collect();
-                    serde_json::json!({ "app": app.name(), "roles": roles })
+                    serde_json::json!({
+                        "app": app.name(),
+                        "salida": app.default_output(),
+                        "roles": roles,
+                    })
                 })
                 .collect();
             println!("{}", serde_json::json!({ "apps": apps }));
