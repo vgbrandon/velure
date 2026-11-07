@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>velure · %%SOURCE%%</title>
+<style>
+:root{%%VARS%%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif;padding:32px}
+main{max-width:1180px;margin:auto;display:grid;gap:20px;grid-template-columns:1fr 1fr}
+h1{font-size:20px;margin:0;font-weight:600}
+h2{font-size:12px;margin:0 0 12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+code,pre{font:13px/1.55 ui-monospace,monospace}
+header{grid-column:1/-1}
+header p{margin:4px 0 0;color:var(--subtext)}
+.card{background:var(--surface);border:1px solid var(--overlay);border-radius:10px;padding:18px;min-width:0}
+.wide{grid-column:1/-1}
+img{width:100%;display:block;border-radius:6px;max-height:320px;object-fit:cover}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
+.sw{display:grid;grid-template-columns:30px 1fr;column-gap:10px;align-items:center}
+.sw i{grid-row:span 2;width:30px;height:38px;border-radius:5px;border:1px solid var(--border)}
+.sw b{font-size:13px;font-weight:500;line-height:1.2}
+.sw code{color:var(--muted);font-size:12px}
+.ansi{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:14px}
+.ansi i{height:24px;border-radius:3px}
+.bar{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.bar i{display:block}
+.note{color:var(--muted);font-size:13px;margin:10px 0 0}
+button{font:inherit;border:0;border-radius:6px;padding:7px 14px;margin:0 6px 6px 0}
+.b1{background:var(--primary);color:var(--on-primary)}
+.b2{background:var(--primary-container);color:var(--text)}
+.b3{background:transparent;color:var(--subtext);border:1px solid var(--border)}
+.chips span{display:inline-block;font-size:13px;border:1px solid var(--overlay);border-radius:99px;padding:1px 10px;margin:0 4px 6px 0}
+.term{background:var(--crust);border-radius:8px;padding:14px;margin:0;overflow:auto;white-space:pre}
+ul{list-style:none;margin:0;padding:0;columns:2;column-gap:28px}
+li{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:3px 0;break-inside:avoid}
+li code{color:var(--muted);font-size:12px;white-space:nowrap}
+li.ok span::before{content:"✓ ";color:var(--success)}
+li.ko span::before{content:"✗ ";color:var(--error)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>%%SOURCE%%</h1>
+  <p>Estilo %%STYLE%% · armonía %%SCHEME%% · %%ORIGIN%%</p>
+</header>
+<section class="card">
+  <h2>Imagen</h2>
+  <img src="data:image/jpeg;base64,%%THUMB%%" alt="">
+</section>
+<section class="card">
+  <h2>Interfaz</h2>
+  <p style="margin:0 0 12px">El texto de cuerpo se lee sobre la superficie, con un <a style="color:var(--secondary)">enlace</a> y un detalle en <span style="color:var(--tertiary)">terciario</span>. <span style="color:var(--muted)">Nota atenuada.</span></p>
+  <button class="b1">Primario</button><button class="b2">Contenedor</button><button class="b3">Discreto</button>
+  <div class="chips" style="margin-top:8px">
+    <span style="color:var(--error)">error</span><span style="color:var(--warning)">aviso</span><span style="color:var(--success)">éxito</span><span style="color:var(--info)">info</span>
+  </div>
+  <h2 style="margin-top:14px">Proporción 60-30-10</h2>
+  <div class="bar">
+    <i style="flex:60;background:var(--bg)"></i><i style="flex:30;background:var(--overlay)"></i><i style="flex:6;background:var(--primary)"></i><i style="flex:3;background:var(--secondary)"></i><i style="flex:1;background:var(--tertiary)"></i>
+  </div>
+</section>
+<section class="card wide">
+  <h2>Roles</h2>
+  <div class="swatches">%%SWATCHES%%</div>
+  <div class="ansi">%%ANSI%%</div>
+</section>
+<section class="card">
+  <h2>Terminal</h2>
+<pre class="term"><span style="color:var(--a4)">~/proyectos/app</span> <span style="color:var(--a8)">main</span> <span style="color:var(--a5)">❯</span> cargo test
+<span style="color:var(--a2)">   Compiling</span> app v0.1.0
+<span style="color:var(--a6)">     Running</span> unittests src/lib.rs
+test parser::basico ... <span style="color:var(--a2)">ok</span>
+test parser::vacio  ... <span style="color:var(--a1)">FAILED</span>
+<span style="color:var(--a3)">warning</span>: variable sin usar `tmp`
+<span style="color:var(--a8)">drwxr-xr-x  vgb  4.0K  src/</span></pre>
+</section>
+<section class="card">
+  <h2>Código</h2>
+<pre class="term"><span style="color:var(--muted)">// Calcula el total con impuestos</span>
+<span style="color:var(--primary)">pub fn</span> <span style="color:var(--secondary)">total</span>(items: &amp;[<span style="color:var(--tertiary)">Item</span>]) -&gt; <span style="color:var(--tertiary)">f64</span> {
+    <span style="color:var(--primary)">let</span> tasa = <span style="color:var(--tertiary)">0.18</span>;
+    <span style="color:var(--primary)">let</span> nota = <span style="color:var(--success)">"factura"</span>;
+    items.<span style="color:var(--secondary)">iter</span>().<span style="color:var(--secondary)">map</span>(|i| i.precio * tasa).<span style="color:var(--secondary)">sum</span>()
+}</pre>
+</section>
+<section class="card wide">
+  <h2>Auditoría</h2>
+  <ul>%%CHECKS%%</ul>
+</section>
+</main>
+</body>
+</html>
