@@ -36,15 +36,23 @@ velure fondo.jpg --json                   # paleta en JSON por stdout
 
 ## Formatos
 
-| Formato | Archivo | Cómo se usa |
+`-x` escribe en una carpeta (por defecto `./velure-<imagen>`) para usar los archivos en
+otro equipo o en otro tema. En tu escritorio no hace falta copiar nada: `velure aplicar`
+escribe cada tema en su sitio (ver «Como tema del escritorio»).
+
+`kitty`, `fish`, `starship` y `gtk` son exactamente los mismos temas que escribe
+`velure aplicar`, también en modo claro con `-m claro`.
+
+| Formato | Archivo | Qué es |
 | --- | --- | --- |
-| `kitty` | `kitty.conf` | cópialo como `~/.config/kitty/velure-tema.conf` y añade `include velure-tema.conf` a tu `kitty.conf` |
-| `hyprland` | `hyprland.conf` | cópialo como `~/.config/hypr/velure-tema.conf`, añade `source = ~/.config/hypr/velure-tema.conf` y usa `$primary`, `$border`... |
+| `kitty` | `velure.conf` | el tema de kitty; se carga con `include velure.conf` |
+| `fish` | `velure-colors.fish` | el resaltado de fish; se carga con `source` |
+| `starship` | `palette-velure.toml` | la paleta `velure`; se une a `starship.toml` con `palette = "velure"` |
+| `gtk` | `gtk.css` | colores de GTK3 y de libadwaita (`@define-color` y variables CSS) |
+| `tokens` | `tokens.json` | los 57 tokens |
+| `hyprland` | `hyprland.conf` | variables `$primary`, `$border`...; se carga con `source = ~/.config/hypr/velure.conf` |
 | `quickshell` | `Palette.qml` | singleton QML: `Palette.primary`, `Palette.ansi[1]`... |
 | `nvim` | `velure.lua` | cópialo a `~/.config/nvim/colors/` y usa `:colorscheme velure` |
-| `fish` | `velure.theme` | cópialo a `~/.config/fish/themes/` y usa `fish_config theme choose velure` |
-| `starship` | `starship.toml` | copia las líneas a tu `starship.toml` |
-| `gtk` | `gtk.css` | `@define-color`, con los nombres de libadwaita |
 | `css` | `colors.css` | variables CSS |
 | `base16` | `base16.yaml` | esquema para cualquier plantilla base16 |
 | `json` | `palette.json` | la paleta completa, con metadatos |
@@ -138,8 +146,11 @@ stderr sin detener a las demás.
 
 ### Tokens
 
-Son 57 y cada color tiene un solo nombre. Se añade un token cuando algo lo necesita. Salen de la paleta auditada, en modo oscuro, y
-`CONTRAST_RULES` (`src/tokens.rs`) declara el contraste mínimo de cada par.
+Son 57 y cada color tiene un solo nombre. Se añade un token cuando algo lo necesita.
+Salen de la paleta auditada y `CONTRAST_RULES` (`src/tokens.rs`) declara el contraste
+mínimo de cada par. En modo claro se invierten las reglas que dependen de la luz: el
+énfasis es casi negro, los contenedores son pálidos y el código y el degradado, más
+oscuros. `velure aplicar` siempre pide la paleta oscura, porque tu escritorio la supone.
 
 | Tokens | Regla |
 |---|---|
