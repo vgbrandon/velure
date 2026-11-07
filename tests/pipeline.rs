@@ -294,9 +294,10 @@ fn every_exporter_writes_real_colours() {
     };
     for f in Format::value_variants() {
         let s = export::render(*f, &ctx).unwrap();
+        // Starship's palette has no text colour and Base16 has no primary.
         assert!(
-            s.contains(&p.neutrals.text.bare()),
-            "{f:?} no contiene el color de texto"
+            s.contains(&p.neutrals.text.bare()) || s.contains(&p.accents.primary.bare()),
+            "{f:?} no contiene ni el texto ni el primario"
         );
         assert!(!s.contains("%%"), "{f:?} dejó marcadores sin reemplazar");
     }
@@ -938,5 +939,64 @@ mod shell_apps {
             "background-color: {};",
             t.get("outline").unwrap().hex()
         )));
+    }
+}
+
+mod exports_share_the_app_themes {
+    use velure::apps;
+    use velure::audit;
+    use velure::export::{self, Context_, Format};
+    use velure::harmony;
+    use velure::palette::{self, Mode, Options, Style};
+    use velure::tokens::derive;
+
+    #[test]
+    fn exported_files_are_the_themes_aplicar_writes() {
+        for mode in [Mode::Dark, Mode::Light] {
+            let img = image::RgbImage::from_fn(80, 40, |x, _| {
+                image::Rgb(if x < 40 {
+                    [20, 70, 160]
+                } else {
+                    [220, 120, 30]
+                })
+            });
+            let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+            let p = palette::build(
+                &harmony::analyze(clusters),
+                &Options {
+                    source: "prueba".into(),
+                    mode: Some(mode),
+                    style: Style::Balanced,
+                    scheme: None,
+                },
+            );
+            let checks = audit::run(&p);
+            let ctx = Context_ {
+                palette: &p,
+                checks: &checks,
+                thumbnail_jpeg: &[],
+            };
+            let t = derive(&p);
+            assert_eq!(
+                export::render(Format::Kitty, &ctx).unwrap(),
+                apps::kitty::render(&t)
+            );
+            assert_eq!(
+                export::render(Format::Fish, &ctx).unwrap(),
+                apps::fish::render(&t)
+            );
+            assert_eq!(
+                export::render(Format::Starship, &ctx).unwrap(),
+                apps::starship::render(&t)
+            );
+            assert_eq!(
+                export::render(Format::Gtk, &ctx).unwrap(),
+                apps::gtk::render(&t, true)
+            );
+            assert_eq!(Format::Kitty.file_name(), "velure.conf");
+            let json: serde_json::Value =
+                serde_json::from_str(&export::render(Format::Tokens, &ctx).unwrap()).unwrap();
+            assert_eq!(json["text"], t.get("text").unwrap().hex());
+        }
     }
 }

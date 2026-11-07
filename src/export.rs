@@ -8,9 +8,11 @@ use anyhow::{Context, Result};
 use base64::Engine;
 use clap::ValueEnum;
 
+use crate::apps;
 use crate::audit::Check;
 use crate::color::Color;
 use crate::palette::{Mode, Palette};
+use crate::tokens;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
 pub enum Format {
@@ -25,6 +27,7 @@ pub enum Format {
     Nvim,
     Base16,
     Preview,
+    Tokens,
 }
 
 impl Format {
@@ -33,14 +36,15 @@ impl Format {
             Format::Json => "palette.json",
             Format::Css => "colors.css",
             Format::Gtk => "gtk.css",
-            Format::Kitty => "kitty.conf",
+            Format::Kitty => "velure.conf",
             Format::Hyprland => "hyprland.conf",
             Format::Quickshell => "Palette.qml",
-            Format::Starship => "starship.toml",
-            Format::Fish => "velure.theme",
+            Format::Starship => "palette-velure.toml",
+            Format::Fish => "velure-colors.fish",
             Format::Nvim => "velure.lua",
             Format::Base16 => "base16.yaml",
             Format::Preview => "preview.html",
+            Format::Tokens => "tokens.json",
         }
     }
 }
@@ -51,20 +55,24 @@ pub struct Context_<'a> {
     pub thumbnail_jpeg: &'a [u8],
 }
 
+/// kitty, fish, Starship and GTK are the same themes `velure aplicar` writes, built from
+/// the tokens of this palette, light or dark.
 pub fn render(format: Format, ctx: &Context_) -> Result<String> {
     let p = ctx.palette;
+    let tokens = || tokens::derive(p);
     Ok(match format {
         Format::Json => json(p, ctx.checks)?,
         Format::Css => css(p),
-        Format::Gtk => gtk(p),
-        Format::Kitty => kitty(p),
+        Format::Gtk => apps::gtk::render(&tokens(), true),
+        Format::Kitty => apps::kitty::render(&tokens()),
         Format::Hyprland => hyprland(p),
         Format::Quickshell => quickshell(p),
-        Format::Starship => starship(p),
-        Format::Fish => fish(p),
+        Format::Starship => apps::starship::render(&tokens()),
+        Format::Fish => apps::fish::render(&tokens()),
         Format::Nvim => nvim(p),
         Format::Base16 => base16(p),
         Format::Preview => preview(ctx),
+        Format::Tokens => serde_json::to_string_pretty(&tokens::to_json(&tokens()))? + "\n",
     })
 }
 
@@ -110,67 +118,9 @@ fn css(p: &Palette) -> String {
     s + "}\n"
 }
 
-fn gtk(p: &Palette) -> String {
-    let mut s = format!("/* {} */\n", header(p, "").trim());
-    for (name, c) in p.roles() {
-        s += &format!("@define-color {} {};\n", name, c.hex());
-    }
-    let (n, a) = (&p.neutrals, &p.accents);
-    for (name, c) in [
-        ("accent_color", a.primary),
-        ("accent_bg_color", a.primary),
-        ("accent_fg_color", a.on_primary),
-        ("window_bg_color", n.bg),
-        ("window_fg_color", n.text),
-        ("view_bg_color", n.bg),
-        ("view_fg_color", n.text),
-        ("headerbar_bg_color", n.crust),
-        ("headerbar_fg_color", n.text),
-        ("sidebar_bg_color", n.crust),
-        ("sidebar_fg_color", n.text),
-        ("card_bg_color", n.surface),
-        ("card_fg_color", n.text),
-        ("popover_bg_color", n.surface),
-        ("popover_fg_color", n.text),
-    ] {
-        s += &format!("@define-color {} {};\n", name, c.hex());
-    }
-    s
-}
-
-fn kitty(p: &Palette) -> String {
-    let (n, a) = (&p.neutrals, &p.accents);
-    let mut s = header(p, "#");
-    for (k, c) in [
-        ("foreground", n.text),
-        ("background", n.bg),
-        ("selection_foreground", n.text),
-        ("selection_background", a.primary_container),
-        ("cursor", a.primary),
-        ("cursor_text_color", a.on_primary),
-        ("url_color", a.secondary),
-        ("active_border_color", a.primary),
-        ("inactive_border_color", n.border),
-        ("bell_border_color", p.semantic.warning),
-        ("active_tab_foreground", a.on_primary),
-        ("active_tab_background", a.primary),
-        ("inactive_tab_foreground", n.subtext),
-        ("inactive_tab_background", n.surface),
-        ("tab_bar_background", n.crust),
-        ("mark1_foreground", a.on_primary),
-        ("mark1_background", a.primary),
-    ] {
-        s += &format!("{k} {}\n", c.hex());
-    }
-    for (i, c) in p.ansi.iter().enumerate() {
-        s += &format!("color{i} {}\n", c.hex());
-    }
-    s
-}
-
 fn hyprland(p: &Palette) -> String {
     let mut s = header(p, "#");
-    s += "# Uso: source = ~/.config/hypr/velure-tema.conf y luego $primary, $border...\n";
+    s += "# Uso: source = ~/.config/hypr/velure.conf y luego $primary, $border...\n";
     for (name, c) in p.roles() {
         s += &format!("${} = rgb({})\n", name, c.bare());
     }
@@ -213,49 +163,6 @@ fn camel(name: &str) -> String {
         }
     }
     out
-}
-
-fn starship(p: &Palette) -> String {
-    let mut s = header(p, "#");
-    s += "# Copia estas líneas en ~/.config/starship.toml\npalette = \"velure-tema\"\n\n[palettes.velure-tema]\n";
-    for (name, c) in p.roles() {
-        s += &format!("{} = \"{}\"\n", name, c.hex());
-    }
-    s
-}
-
-fn fish(p: &Palette) -> String {
-    let (n, a, m) = (&p.neutrals, &p.accents, &p.semantic);
-    let mut s = header(p, "#");
-    for (k, c) in [
-        ("fish_color_normal", n.text),
-        ("fish_color_command", a.primary),
-        ("fish_color_keyword", a.secondary),
-        ("fish_color_quote", m.success),
-        ("fish_color_redirection", a.tertiary),
-        ("fish_color_end", a.tertiary),
-        ("fish_color_error", m.error),
-        ("fish_color_param", n.subtext),
-        ("fish_color_option", n.subtext),
-        ("fish_color_comment", n.muted),
-        ("fish_color_operator", a.secondary),
-        ("fish_color_escape", a.tertiary),
-        ("fish_color_autosuggestion", n.muted),
-        ("fish_color_cwd", a.primary),
-        ("fish_color_host", n.subtext),
-        ("fish_color_user", a.secondary),
-        ("fish_color_cancel", m.error),
-        ("fish_pager_color_prefix", a.primary),
-        ("fish_pager_color_completion", n.text),
-        ("fish_pager_color_description", n.muted),
-        ("fish_pager_color_progress", n.muted),
-    ] {
-        s += &format!("{k} {}\n", c.bare());
-    }
-    s + &format!(
-        "fish_color_selection --background={}\n",
-        a.primary_container.bare()
-    )
 }
 
 fn nvim(p: &Palette) -> String {
