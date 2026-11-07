@@ -353,6 +353,57 @@ mod desktop_tokens {
         }
     }
 
+    fn light(colors: &[[u8; 3]], style: Style) -> Palette {
+        let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
+            image::Rgb(colors[x as usize / 40])
+        });
+        let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+        palette::build(
+            &harmony::analyze(clusters),
+            &Options {
+                source: "prueba".into(),
+                mode: Some(Mode::Light),
+                style,
+                scheme: None,
+            },
+        )
+    }
+
+    #[test]
+    fn light_tokens_keep_every_contrast_rule() {
+        for colors in IMAGES {
+            for style in STYLES {
+                let t = derive(&light(colors, style));
+                let failures = t.contrast_failures();
+                assert!(failures.is_empty(), "{failures:?}");
+                // Emphasis and containers follow the mode: dark emphasis, pale containers.
+                assert!(get(&t, "emphasis").to_lch().l < 0.5);
+                assert!(get(&t, "error_container").to_lch().l > get(&t, "error").to_lch().l);
+            }
+        }
+    }
+
+    #[test]
+    fn light_code_colours_are_told_apart() {
+        for colors in IMAGES {
+            let t = derive(&light(colors, Style::Sober));
+            let code = [
+                "syntax_keyword",
+                "syntax_function",
+                "syntax_type",
+                "syntax_string",
+                "syntax_number",
+                "syntax_property",
+            ];
+            for (i, name) in code.iter().enumerate() {
+                for other in code[i + 1..].iter().chain(&["text", "subtext", "muted"]) {
+                    let gap = get(&t, name).delta_e(get(&t, other));
+                    assert!(gap >= 0.05, "{name} y {other} a {gap:.3}");
+                }
+            }
+        }
+    }
+
     #[test]
     fn contrast_rules_name_real_tokens() {
         let t = derive(&palette(IMAGES[0], Style::Balanced));

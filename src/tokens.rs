@@ -2,12 +2,14 @@
 //! palette is the only input, so everything here inherits its colour decisions. The rules
 //! only fill the steps the desktop needs and the palette doesn't have.
 //!
-//! Tokens are dark only: the desktop they feed assumes a dark theme.
+//! Light themes mirror the rules that depend on lightness: emphasis, containers, code
+//! colours and the gradient. `velure aplicar` always asks for a dark palette, because the
+//! desktop assumes one; `-x` can export either.
 
 use serde_json::{Value, json};
 
 use crate::color::{Color, Oklch, hue_diff, norm_hue};
-use crate::palette::{Palette, ensure_contrast, mix};
+use crate::palette::{Mode, Palette, ensure_contrast, mix};
 
 /// Below this chroma an image colour reads as grey and says nothing about hue.
 const COLORFUL: f64 = 0.03;
@@ -15,8 +17,7 @@ const COLORFUL: f64 = 0.03;
 const GRADIENT_SPREAD: f64 = 35.0;
 /// Hues for code colours when the image doesn't offer enough of its own.
 const SYNTAX_ANCHORS: [f64; 8] = [150.0, 58.0, 200.0, 330.0, 255.0, 27.0, 95.0, 295.0];
-/// Lightness and chroma of a code colour taken from a hue alone: quieter than an accent.
-const SYNTAX_LIGHTNESS: f64 = 0.78;
+/// Chroma of a code colour taken from a hue alone: quieter than an accent.
 const SYNTAX_CHROMA: f64 = 0.08;
 /// Accents can be nearly grey on sober themes, but code needs a visible tint.
 const SYNTAX_MIN_CHROMA: f64 = 0.06;
@@ -98,26 +99,42 @@ fn lch(l: f64, c: f64, h: f64) -> Color {
     Oklch::new(l, c, h).to_color()
 }
 
-/// Text for a solid fill: the tinted dark or tinted light, whichever reads better.
+/// Text for a solid fill: the tinted dark or tinted light, whichever reads better, pushed
+/// further if a mid-tone fill leaves both short of 4.5:1.
 fn on_fill(fill: Color) -> Color {
     let h = fill.to_lch().h;
-    let (dark, light) = (lch(0.18, 0.03, h), lch(0.96, 0.02, h));
-    if fill.contrast(dark) >= fill.contrast(light) {
+    let (dark, light) = (Oklch::new(0.18, 0.03, h), Oklch::new(0.96, 0.02, h));
+    let best = if fill.contrast(dark.to_color()) >= fill.contrast(light.to_color()) {
         dark
     } else {
         light
+    };
+    ensure_contrast(best, fill, 4.5).to_color()
+}
+
+/// Lightness that depends on the mode: `dark` on dark themes, `light` on light ones.
+fn by_mode(mode: Mode, dark: f64, light: f64) -> f64 {
+    match mode {
+        Mode::Dark => dark,
+        Mode::Light => light,
     }
 }
 
-/// A deep, quiet version of a colour for backgrounds that hold text.
-fn container(color: Color) -> Color {
+/// A quiet version of a colour for backgrounds that hold text: deep on dark themes, pale
+/// on light ones.
+fn container(color: Color, mode: Mode) -> Color {
     let c = color.to_lch();
-    lch(0.34, (c.c * 0.55).clamp(0.03, 0.08), c.h)
+    lch(
+        by_mode(mode, 0.34, 0.90),
+        (c.c * 0.55).clamp(0.03, 0.08),
+        c.h,
+    )
 }
 
-fn on_container(container: Color) -> Color {
+fn on_container(container: Color, mode: Mode) -> Color {
     let h = container.to_lch().h;
-    ensure_contrast(Oklch::new(0.92, 0.03, h), container, 7.0).to_color()
+    let start = Oklch::new(by_mode(mode, 0.92, 0.25), 0.03, h);
+    ensure_contrast(start, container, 7.0).to_color()
 }
 
 /// Three hues for literals, far from the accents: image hues first, then neutral anchors.
@@ -178,7 +195,8 @@ fn syntax(p: &Palette) -> [Color; 6] {
         let c = c.to_lch();
         Oklch::new(c.l, c.c.max(SYNTAX_MIN_CHROMA.min(cap)), c.h)
     };
-    let literal = |h: f64| Oklch::new(SYNTAX_LIGHTNESS, SYNTAX_CHROMA.min(cap), h);
+    let lightness = by_mode(p.meta.mode, 0.78, 0.48);
+    let literal = |h: f64| Oklch::new(lightness, SYNTAX_CHROMA.min(cap), h);
     let [string, number, property] = literal_hues(p);
     let starts = [
         tinted(a.primary),
@@ -196,7 +214,8 @@ fn syntax(p: &Palette) -> [Color; 6] {
     })
 }
 
-/// Tertiary side → primary → secondary side, from deep to light, for visualisers.
+/// Tertiary side → primary → secondary side, for visualisers: from deep to light on dark
+/// themes, and darker overall on light ones so it still shows.
 fn gradient(p: &Palette) -> [Color; 8] {
     let primary = p.accents.primary.to_lch();
     let cap = p.meta.style.chroma_cap();
@@ -211,7 +230,8 @@ fn gradient(p: &Palette) -> [Color; 8] {
             to_secondary * ((t - 0.5) / 0.5)
         };
         let chroma = (primary.c.min(cap) * (0.8 + 0.4 * t)).min(cap);
-        lch(0.60 + 0.22 * t, chroma, norm_hue(primary.h + turn))
+        let start = by_mode(p.meta.mode, 0.60, 0.42);
+        lch(start + 0.22 * t, chroma, norm_hue(primary.h + turn))
     })
 }
 
@@ -236,21 +256,26 @@ pub fn derive(p: &Palette) -> Tokens {
     t.push("subtext", n.subtext);
     t.push("muted", n.muted);
 
-    // Emphasis without colour: active workspaces, checkboxes, badges.
-    let emphasis = lch(0.88, 0.02, a.primary.to_lch().h);
+    // Emphasis without colour: active workspaces, checkboxes, badges. Near the text end of
+    // the ladder: almost white on dark themes, almost black on light ones.
+    let mode = p.meta.mode;
+    let emphasis = lch(by_mode(mode, 0.88, 0.30), 0.02, a.primary.to_lch().h);
     t.push("emphasis", emphasis);
     t.push("on_emphasis", on_fill(emphasis));
 
     t.push("primary", a.primary);
     t.push("on_primary", a.on_primary);
     t.push("primary_container", a.primary_container);
-    t.push("on_primary_container", on_container(a.primary_container));
+    t.push(
+        "on_primary_container",
+        on_container(a.primary_container, mode),
+    );
     t.push("secondary", a.secondary);
     t.push("tertiary", a.tertiary);
 
     t.push("error", s.error);
     t.push("on_error", on_fill(s.error));
-    t.push("error_container", container(s.error));
+    t.push("error_container", container(s.error, mode));
     t.push("warning", s.warning);
     t.push("on_warning", on_fill(s.warning));
     t.push("success", s.success);
