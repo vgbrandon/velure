@@ -5,11 +5,12 @@ use std::process::ExitCode;
 use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand, ValueEnum};
 
+use velure::apps::App;
 use velure::export::{self, Context_, Format};
 use velure::harmony::{self, Scheme};
 use velure::palette::{self, Mode, Options, Style};
 use velure::terminal::{self, Painter};
-use velure::{audit, extract, tokens};
+use velure::{audit, extract, templates, tokens};
 
 /// Crea temas de ricing elegantes a partir de una imagen.
 #[derive(Parser)]
@@ -54,6 +55,39 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Comando {
+    /// Aplica la imagen como tema del escritorio: deriva los tokens, escribe los temas de
+    /// las apps y las plantillas y ejecuta sus ganchos. Imprime los tokens como JSON
+    /// (siempre en modo oscuro)
+    Aplicar {
+        /// Imagen de origen
+        imagen: PathBuf,
+
+        /// Intensidad del color
+        #[arg(short, long, value_enum, default_value = "equilibrado")]
+        estilo: Style,
+
+        /// Fuerza una armonía; por defecto se detecta en la imagen
+        #[arg(short, long, value_enum)]
+        armonia: Option<Scheme>,
+
+        /// Configuración de las plantillas
+        #[arg(
+            long,
+            value_name = "ARCHIVO",
+            default_value = "~/.config/velure/config.toml"
+        )]
+        config: String,
+
+        /// Escribe los temas sin avisar a las apps
+        #[arg(long)]
+        sin_ganchos: bool,
+
+        /// Solo imprime los tokens, sin escribir temas
+        #[arg(long)]
+        sin_plantillas: bool,
+    },
+    /// Qué tokens usa cada app incorporada (para la guía de la shell)
+    Uso,
     /// Escribe los tokens y su origen, los datos que muestran las guías de color
     Tokens {
         /// Imagen de origen
@@ -124,6 +158,52 @@ fn desktop_palette(
 
 fn run(cli: Cli) -> Result<()> {
     match cli.comando {
+        Some(Comando::Aplicar {
+            imagen,
+            estilo,
+            armonia,
+            config,
+            sin_ganchos,
+            sin_plantillas,
+        }) => {
+            let (palette, source) = desktop_palette(&imagen, estilo, armonia)?;
+            let derived = tokens::derive(&palette);
+            let failures = derived.contrast_failures();
+            if !failures.is_empty() {
+                eprintln!("velure: contraste insuficiente: {}", failures.join("; "));
+            }
+            if !sin_plantillas {
+                let config = templates::expand_home(&config);
+                if let Err(e) = templates::apply(&config, &derived, &source, !sin_ganchos) {
+                    eprintln!("velure: {e:#}");
+                }
+            }
+            // The colours are valid even if an app failed, so the shell must still get them.
+            println!(
+                "{}",
+                serde_json::json!({
+                    "image": source,
+                    "achromatic": palette.meta.achromatic_source,
+                    "tokens": tokens::to_json(&derived),
+                })
+            );
+            return Ok(());
+        }
+        Some(Comando::Uso) => {
+            let apps: Vec<serde_json::Value> = App::ALL
+                .iter()
+                .map(|app| {
+                    let roles: serde_json::Map<String, serde_json::Value> = app
+                        .usage()
+                        .into_iter()
+                        .map(|(token, count)| (token.to_string(), count.into()))
+                        .collect();
+                    serde_json::json!({ "app": app.name(), "roles": roles })
+                })
+                .collect();
+            println!("{}", serde_json::json!({ "apps": apps }));
+            return Ok(());
+        }
         Some(Comando::Tokens {
             imagen,
             estilo,

@@ -1,0 +1,131 @@
+/*
+ * velure: generado desde el fondo de pantalla. No editar a mano (el original está en
+ * src/apps/firefox de velure).
+ * Colores del marco de Firefox (pestañas, barras, menús, barra lateral) con los tokens
+ * de Velure, como la barra y los paneles de Quickshell. Con el autoconfig de Velure
+ * (velure.cfg en /usr/lib/firefox) se cargan en vivo desde ~/.cache/velure, sin
+ * reiniciar; sin él, scripts/firefox.sh los copia al perfil como userChrome.css.
+ * Hecho para Firefox 158 con el diseño Nova (browser.nova.enabled): pisa sus tokens
+ * (--toolbar-background-color, --tab-background-color-selected, --panel-*…) en :root.
+ * Solo sin tema instalado (:not([lwtheme])).
+ */
+:root:not([lwtheme]) {
+  color-scheme: dark !important;
+
+  /* Base: los tokens del sistema de diseño, que heredan casi todos los demás */
+  --background-color-canvas: {{bg}} !important;
+  --background-color-box: {{surface}} !important;
+  --text-color: {{text}} !important;
+  --text-color-deemphasized: {{subtext}} !important;
+  --border-color: {{border}} !important;
+  --border-color-deemphasized: {{border}} !important;
+  --border-color-interactive: {{outline}} !important;
+  --icon-color: {{text}} !important;
+  --link-color: {{primary}} !important;
+  --link-color-hover: {{emphasis}} !important;
+  --link-color-active: {{emphasis}} !important;
+
+  /* El acento (lo principal), sin el violeta de Nova */
+  --color-accent-primary: {{primary}} !important;
+  --color-accent-primary-hover: color-mix(in srgb, {{primary}} 88%, white) !important;
+  --color-accent-primary-active: color-mix(in srgb, {{primary}} 76%, white) !important;
+  --color-accent-primary-selected: {{primary}} !important;
+  --text-color-accent-primary-selected: {{on_primary}} !important;
+  --focus-outline-color: {{primary}} !important;
+  --tab-icon-fill-loading: {{primary}} !important;
+  --toolbarbutton-icon-fill-attention: {{primary}} !important;
+
+  /* Botones: los normales un escalón por encima, el principal en el acento */
+  --button-background-color: {{surface_high}} !important;
+  --button-background-color-hover: {{overlay}} !important;
+  --button-background-color-active: {{border}} !important;
+  --button-text-color: {{text}} !important;
+  --button-text-color-hover: {{text}} !important;
+  --button-background-color-primary: {{primary}} !important;
+  --button-background-color-primary-hover: color-mix(in srgb, {{primary}} 88%, white) !important;
+  --button-background-color-primary-active: color-mix(in srgb, {{primary}} 76%, white) !important;
+  --button-text-color-primary: {{on_primary}} !important;
+  --button-border-color: transparent !important;
+
+  /* Marco: el mismo fondo que la barra de Quickshell, sin cambio entre ventana activa e
+     inactiva */
+  --toolbox-background-color: {{bg}} !important;
+  --toolbox-background-color-inactive: {{bg}} !important;
+  --toolbox-text-color: {{text}} !important;
+  --toolbox-text-color-inactive: {{subtext}} !important;
+  --toolbar-background-color: {{bg}} !important;
+  --toolbar-text-color: {{text}} !important;
+  --tabpanel-background-color: {{bg}} !important;
+  --chrome-content-separator-color: {{border}} !important;
+  --tabs-navbar-separator-color: transparent !important;
+
+  /* Botones de las barras: capa de estado sobre el fondo, como en Quickshell */
+  --toolbarbutton-icon-fill: {{text}} !important;
+  --toolbarbutton-background-color-hover: color-mix(in srgb, {{text}} 8%, transparent) !important;
+  --toolbarbutton-background-color-active: color-mix(in srgb, {{text}} 12%, transparent) !important;
+
+  /* Pestañas: la activa un escalón por encima, sin el borde violeta y naranja de Nova */
+  --tab-background-color: transparent !important;
+  --tab-background-color-hover: color-mix(in srgb, {{text}} 8%, transparent) !important;
+  --tab-background-color-selected: {{surface}} !important;
+  --tab-text-color: {{subtext}} !important;
+  --tab-text-color-hover: {{text}} !important;
+  --tab-text-color-selected: {{text}} !important;
+  --tab-border-color-selected: transparent !important;
+  --tab-border-color-selected-leading: transparent !important;
+  --tab-border-color-selected-trailing: transparent !important;
+  --tab-box-shadow-selected: none !important;
+
+  /* Campo de dirección: hundido como los campos de Quickshell; al enfocarlo, solo el
+     borde en el acento (sin halo) */
+  --toolbar-field-background-color: {{surface}} !important;
+  --toolbar-field-background-color-focus: {{surface}} !important;
+  --toolbar-field-text-color: {{text}} !important;
+  --toolbar-field-text-color-focus: {{text}} !important;
+  --toolbar-field-border-color: transparent !important;
+  /* Como el Field de Quickshell: el acento al 60 % */
+  --toolbar-field-border-color-focus: color-mix(in srgb, {{primary}} 60%, transparent) !important;
+  --urlbar-box-background-color: {{surface_high}} !important;
+  --urlbar-box-background-color-hover: {{overlay}} !important;
+  --urlbarview-background-color-hover: color-mix(in srgb, {{text}} 8%, transparent) !important;
+  --urlbarview-background-color-selected: {{primary_container}} !important;
+  --urlbarview-text-color-selected: {{on_primary_container}} !important;
+  --urlbarview-text-color-secondary: {{subtext}} !important;
+  --urlbarview-separator-color: {{border}} !important;
+
+  /* Menús y paneles: como los paneles de Quickshell */
+  --panel-background-color: {{surface}} !important;
+  --panel-text-color: {{text}} !important;
+  --panel-border-color: {{border}} !important;
+  --panel-separator-color: {{border}} !important;
+  --background-color-list-item-hover: color-mix(in srgb, {{text}} 8%, transparent) !important;
+  --text-color-list-item-hover: {{text}} !important;
+
+  /* Barra lateral */
+  --sidebar-background-color: {{bg}} !important;
+  --sidebar-text-color: {{text}} !important;
+  --sidebar-border-color: {{border}} !important;
+}
+
+/* Los menús redefinen sus colores en su propio elemento (popup.css): ahí también */
+:root:not([lwtheme]) :is(menupopup, panel) {
+  --panel-background-color: {{surface}} !important;
+  --panel-text-color: {{text}} !important;
+  --panel-border-color: {{border}} !important;
+}
+
+:root:not([lwtheme]) #navigator-toolbox {
+  background-color: {{bg}} !important;
+  color: {{text}} !important;
+}
+
+/* Campo de dirección enfocado: solo su borde en el acento (--toolbar-field-border-color-focus),
+   de 1 px como los campos de Quickshell (Nova lo dobla al enfocarlo), sin el anillo de
+   foco de encima */
+:root:not([lwtheme]) #urlbar {
+  --urlbar-input-container-border-width-open: var(--urlbar-input-container-border-width) !important;
+  --urlbar-background-outline-focused: none !important;
+  /* Con el panel de sugerencias abierto, Nova lo rodea de un brillo violeta
+     (--chrome-box-shadow); aquí una sombra negra suave, como la de los paneles de Velure */
+  --chrome-box-shadow: rgba(0, 0, 0, 0.35) !important;
+}

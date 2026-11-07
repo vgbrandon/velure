@@ -1,0 +1,58 @@
+/*
+ * velure: generado desde el fondo de pantalla. No editar a mano (el original está en
+ * src/apps/firefox de velure).
+ * Páginas internas de Firefox (nueva pestaña, inicio, navegación privada, ajustes,
+ * extensiones…) con los tokens de velure. scripts/firefox.sh lo pone al principio del
+ * userContent.css del perfil, entre marcas; se ve al reiniciar Firefox (las páginas no
+ * admiten estilos en vivo). Hecho para Firefox 158 con el diseño Nova.
+ */
+@-moz-document url-prefix("about:") {
+  :root {
+    color-scheme: dark !important;
+
+    /* Base: los tokens del sistema de diseño */
+    --background-color-canvas: {{bg}} !important;
+    --background-color-box: {{surface}} !important;
+    --card-background-color: {{surface}} !important;
+    --text-color: {{text}} !important;
+    --text-color-deemphasized: {{subtext}} !important;
+    --border-color: {{border}} !important;
+    --border-color-deemphasized: {{border}} !important;
+    --border-color-interactive: {{outline}} !important;
+    --icon-color: {{subtext}} !important;
+    --link-color: {{primary}} !important;
+    --link-color-hover: {{emphasis}} !important;
+    --link-color-active: {{emphasis}} !important;
+
+    /* El acento, sin el violeta de Nova */
+    --color-accent-primary: {{primary}} !important;
+    --color-accent-primary-hover: color-mix(in srgb, {{primary}} 88%, white) !important;
+    --color-accent-primary-active: color-mix(in srgb, {{primary}} 76%, white) !important;
+    --focus-outline-color: {{primary}} !important;
+
+    /* Botones */
+    --button-background-color: {{surface_high}} !important;
+    --button-background-color-hover: {{overlay}} !important;
+    --button-background-color-active: {{border}} !important;
+    --button-text-color: {{text}} !important;
+    --button-background-color-primary: {{primary}} !important;
+    --button-background-color-primary-hover: color-mix(in srgb, {{primary}} 88%, white) !important;
+    --button-background-color-primary-active: color-mix(in srgb, {{primary}} 76%, white) !important;
+    --button-text-color-primary: {{on_primary}} !important;
+
+    /* Nueva pestaña e inicio */
+    --newtab-background-color: {{bg}} !important;
+    --newtab-background-color-secondary: {{surface}} !important;
+    --newtab-background-card: {{surface}} !important;
+    --newtab-text-primary-color: {{text}} !important;
+    --newtab-text-secondary-color: {{subtext}} !important;
+    --newtab-text-topic-label-color: {{primary}} !important;
+    --newtab-primary-action-background: {{primary}} !important;
+    --newtab-primary-element-text-color: {{on_primary}} !important;
+    --newtab-weather-background-color: {{surface}} !important;
+    --newtab-button-static-background: {{surface_high}} !important;
+    --newtab-button-static-hover-background: {{overlay}} !important;
+    --newtab-button-static-active-background: {{border}} !important;
+    --newtab-wordmark-color: {{text}} !important;
+  }
+}

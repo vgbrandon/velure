@@ -1,0 +1,1564 @@
+/*
+ * Tema "velure" para tidal-hifi: generado desde el fondo de pantalla, no editar a mano
+ * (el original está en src/apps/tidal.css de velure). Basado en el tema Catppuccin que
+ * trae tidal-hifi, con su paleta cambiada por los tokens de velure. Tidal aplica el tema
+ * al cargar la página; scripts/tidal.sh lo recarga con Ctrl+R.
+ */
+html {
+  --sidebar-background: {{crust}};
+  --sidebar-hover-background: {{border}};
+  --sidebar-menu-top-text: {{subtext}};
+  --sidebar-menu-playlist-text: {{subtext}};
+  --search-background: {{crust}};
+  --main-background: {{bg}};
+  --main-navigation-control-background: {{crust}};
+  --main-feed-button-background: {{crust}};
+  --player-control-background: {{surface_high}};
+  --player-control-active-button: {{primary}};
+  --player-progress-bar: {{primary}};
+  --indicator-hifi-background: {{ansi_2}};
+  --indicator-hifi-span: {{crust}};
+  --player-control-favorite: {{ansi_1}};
+  --search-dialog-background: {{surface_high}};
+  --right-queue-background: {{crust}};
+  --market-divider-fill-color: transparent;
+  --market-header-divider-color: transparent;
+  --market-core-divider-10-color: transparent;
+  --market-core-divider-20-color: transparent;
+  --market-row-normal-state-separator-color: transparent;
+  --market-row-hover-state-separator-color: transparent;
+  --market-row-hover-state-bg-color: transparent;
+  --market-row-normal-state-bg-color: transparent;
+}
+
+#sidebar {
+  background-color: {{crust}};
+}
+
+[class*=_sidebarWrapper_] {
+  background-color: {{crust}};
+}
+
+#sidebar [class*=_header_] {
+  background-color: {{crust}};
+}
+
+[class*=_navigationItem_] {
+  color: {{subtext}};
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+[class*=_navigationItem_]:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+[class*=_navigationItem_][data-status=active], [class*=_navigationItem_][aria-current=page] {
+  color: {{text}};
+}
+
+[class*=_contentItem_] {
+  color: {{subtext}};
+  transition: background-color 0.15s ease;
+}
+[class*=_contentItem_]:hover {
+  background-color: {{border}};
+  color: {{subtext}};
+}
+[class*=_contentItem_][data-status=active] {
+  color: {{primary}};
+}
+
+[class*=_collectionWrapper_] {
+  border-color: {{surface_high}};
+}
+
+[class*=_fixedNavigation_] {
+  border-color: {{surface_high}};
+}
+
+#sidebar ::-webkit-scrollbar {
+  width: 6px;
+}
+
+#sidebar ::-webkit-scrollbar-thumb {
+  background-color: {{border}};
+  border-radius: 3px;
+}
+
+#sidebar ::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+[class*=_actionButton_] {
+  color: {{subtext}};
+}
+[class*=_actionButton_]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+#mainHeader {
+  background-color: {{crust}};
+}
+
+[data-test=header] {
+  background-color: {{crust}};
+}
+
+[data-test=navigation-arrows] button {
+  color: {{subtext}};
+  background-color: {{crust}};
+  border-color: {{surface_high}};
+}
+[data-test=navigation-arrows] button:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+[data-test=navigation-arrows] button:disabled {
+  color: {{overlay}};
+}
+
+[class*=_logo_][href="/"] {
+  color: {{text}};
+}
+
+[class*=_buttonContainer_] button {
+  color: {{subtext}};
+}
+[class*=_buttonContainer_] button:hover {
+  color: {{text}};
+}
+
+[class*=_searchField_][class*=_searchField_] {
+  background-color: {{crust}};
+  color: {{text}};
+  border-color: transparent;
+  border-radius: 8px;
+}
+[class*=_searchField_][class*=_searchField_]::placeholder {
+  color: {{subtext}};
+}
+[class*=_searchField_][class*=_searchField_]:focus {
+  border-color: {{overlay}};
+  background-color: {{surface_high}};
+}
+
+input[class*=_searchField_] {
+  background-color: {{crust}};
+  color: {{text}};
+  border-color: transparent;
+  border-radius: 8px;
+}
+input[class*=_searchField_]::placeholder {
+  color: {{subtext}};
+}
+input[class*=_searchField_]:focus {
+  border-color: {{overlay}};
+  background-color: {{surface_high}};
+}
+
+[class*=_searchFieldWithPopover_] [class*=_container_] {
+  background-color: {{crust}};
+  border-color: transparent;
+  border-radius: 8px;
+}
+[class*=_searchFieldWithPopover_] [class*=_container_]:focus-within {
+  border-color: {{overlay}};
+  background-color: {{surface_high}};
+}
+
+[class*=_searchFieldFilter_] {
+  background-color: {{surface_high}};
+  color: {{text}};
+  border-color: {{overlay}};
+}
+
+#main {
+  background-color: {{bg}};
+}
+
+[class*=_mainContainer_] {
+  background-color: {{bg}};
+}
+
+[class*=_containerRow_] {
+  background-color: {{bg}};
+}
+[class*=_containerRow_]:hover {
+  background-color: {{bg}} !important;
+}
+
+.mainContent {
+  color: {{text}};
+}
+
+[class*=_headerContainer_] {
+  background-color: {{bg}};
+}
+
+[class*=_dataContainer_] {
+  background-color: {{bg}};
+}
+
+[class*=_detailContainer_] {
+  background-color: {{bg}};
+}
+
+[class*=_actionContainer_] button:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+
+[id^=footerPlayer] {
+  background-color: {{crust}};
+}
+
+[class*=_footerPlayerWrapper_] {
+  background-color: {{crust}};
+}
+
+[class*=_controlWrapper_] {
+  background-color: {{surface_high}};
+}
+
+[class*=_mediaControlButtons_] button {
+  color: {{subtext}};
+}
+[class*=_mediaControlButtons_] button:hover {
+  color: {{text}};
+}
+[class*=_mediaControlButtons_] button[data-status=playing], [class*=_mediaControlButtons_] button[aria-pressed=true] {
+  color: {{primary}};
+}
+
+[class*=_progressBar_] [class*=_progressBarFill_] {
+  background-color: {{primary}};
+}
+
+[class*=_volume_] {
+  color: {{subtext}};
+}
+[class*=_volume_]:hover {
+  color: {{text}};
+}
+
+[class*=_trackListWrapper_] {
+  background-color: {{bg}};
+}
+
+[class*=_tracklistHeaderContainer_] {
+  background-color: {{bg}};
+}
+
+[class*=_trackRow_] {
+  color: {{subtext}};
+}
+[class*=_trackRow_]:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+[class*=_trackRow_][data-status=playing] {
+  color: {{on_primary_container}};
+  background-color: {{primary_container}};
+}
+
+[class*=_mediaPlayerControls_] button {
+  color: {{subtext}};
+}
+[class*=_mediaPlayerControls_] button:hover {
+  color: {{text}};
+}
+[class*=_mediaPlayerControls_] button[data-status=playing] {
+  color: {{primary}};
+}
+
+[class*=_favoriteButton_] {
+  color: {{subtext}};
+}
+[class*=_favoriteButton_]:hover {
+  color: {{ansi_1}};
+}
+[class*=_favoriteButton_][data-favorite=true] {
+  color: {{ansi_1}};
+}
+
+[class*=_feedModule_] {
+  background-color: {{bg}};
+}
+[class*=_feedModule_]:hover {
+  background-color: {{bg}} !important;
+}
+
+[class*=_cardContainer_] {
+  background-color: {{bg}};
+  transition: background-color 0.15s ease;
+}
+[class*=_cardContainer_]:hover {
+  background-color: {{surface_high}};
+}
+
+[class*=_feedTitle_] {
+  color: {{text}};
+}
+
+[class*=_subtitle_] {
+  color: {{subtext}};
+}
+
+[class*=_container_][class*=_header_] {
+  background-color: {{bg}};
+}
+
+[class*=_sectionHeader_] {
+  background-color: {{bg}} !important;
+}
+
+#main [class*=_header_] {
+  background-color: transparent;
+}
+
+[class*=_header_] [class*=_marketText_] {
+  color: {{text}};
+}
+
+[class*=_headerColumn_] {
+  color: {{subtext}};
+}
+
+[class*=_overline_] {
+  color: {{subtext}};
+}
+
+[class*=_feedItem_],
+[class*=_feedCard_] {
+  background-color: {{surface_high}};
+  border-color: {{surface_high}};
+}
+
+[class*=_textContainer_] {
+  color: {{text}};
+}
+
+[class*=_filter_] {
+  color: {{subtext}};
+}
+
+a {
+  color: {{secondary}};
+}
+a:hover {
+  color: {{primary}};
+}
+
+::selection {
+  background-color: {{primary_container}};
+  color: {{text}};
+}
+
+[class*=_queueWrapper_] {
+  background-color: {{surface_high}};
+}
+
+[class*=_modal_],
+[class*=_dialog_] {
+  background-color: {{surface_high}};
+  color: {{text}};
+}
+
+[class*=_contextMenuWrapper_] {
+  background-color: {{surface_high}};
+  border-color: {{overlay}};
+}
+
+[class*=_contextMenuItem_] {
+  color: {{subtext}};
+}
+[class*=_contextMenuItem_]:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+
+#footerPlayer,
+[data-test=footer-player] {
+  background-color: {{crust}};
+  border-top: 1px solid {{surface_high}};
+}
+
+#footerPlayer [class*=_leftColumn_] {
+  color: {{text}};
+}
+#footerPlayer [class*=_leftColumn_] a {
+  color: {{text}};
+}
+#footerPlayer [class*=_leftColumn_] a:hover {
+  color: {{primary}};
+}
+
+[data-test=footer-track-title] a {
+  color: {{text}};
+}
+[data-test=footer-track-title] a:hover {
+  color: {{primary}};
+}
+
+#footerPlayer [class*=_descriptionText_] a {
+  color: {{subtext}};
+}
+#footerPlayer [class*=_descriptionText_] a:hover {
+  color: {{text}};
+}
+
+#playbackControlBar button,
+[data-test=play-controls] button {
+  color: {{subtext}};
+  transition: color 0.15s ease;
+}
+#playbackControlBar button:hover,
+[data-test=play-controls] button:hover {
+  color: {{text}};
+}
+#playbackControlBar button.withBackground[aria-checked=true],
+[data-test=play-controls] button.withBackground[aria-checked=true] {
+  background-color: {{surface_high}};
+}
+#playbackControlBar button.withBackground[aria-checked=true] path,
+[data-test=play-controls] button.withBackground[aria-checked=true] path {
+  fill: {{primary}};
+}
+
+[class*=_playbackButton_] button {
+  color: {{text}};
+}
+
+#progressBar,
+[data-test=progress-bar] {
+  color: {{primary}};
+}
+
+[class*=_progressBarWrapper_] {
+  color: {{primary}};
+}
+
+[class*=_indicator_][class*=_fillingBlock_] {
+  background-color: {{primary}};
+}
+
+[data-test=footer-favorite-button][aria-checked=true] svg,
+[data-test=now-playing-favorite-button][aria-checked=true] svg {
+  color: {{ansi_1}};
+}
+
+[data-test=now-playing],
+#nowPlaying,
+[class*=_nowPlayingContainer_] {
+  background-color: {{bg}} !important;
+  background-image: none !important;
+  color: {{text}};
+}
+
+[class*=_innerContainer_] {
+  background-color: transparent;
+}
+
+#nowPlayingHeader,
+[data-test=header-container] {
+  background-color: transparent;
+}
+
+[class*=_playingFrom_] {
+  color: {{subtext}};
+}
+[class*=_playingFrom_] a {
+  color: {{secondary}};
+}
+[class*=_playingFrom_] a:hover {
+  color: {{primary}};
+}
+
+[class*=_baseButton_][data-test=close-now-playing],
+[class*=_baseButton_][data-test=request-fullscreen],
+[class*=_closeButton_] {
+  color: {{subtext}};
+  background-color: transparent;
+}
+[class*=_baseButton_][data-test=close-now-playing]:hover,
+[class*=_baseButton_][data-test=request-fullscreen]:hover,
+[class*=_closeButton_]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+[class*=_baseButton_][data-test=close-now-playing] span,
+[class*=_baseButton_][data-test=request-fullscreen] span,
+[class*=_closeButton_] span {
+  color: {{subtext}};
+}
+
+[class*=_leftColumn_][class*=_albumMediaQueries_],
+[class*=_leftColumn_] {
+  color: {{text}};
+}
+
+.overlay[class*=_albumImageOverlay_],
+[class*=_albumImageOverlay_] {
+  color: {{text}};
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+[class*=_infoWrapper_] {
+  background-color: transparent;
+}
+
+[data-test=now-playing-track-title] {
+  color: {{text}};
+}
+
+[class*=_artistNameColor_] {
+  color: {{subtext}};
+}
+[class*=_artistNameColor_]:hover {
+  color: {{text}};
+}
+
+[class*=_subTitleText_] {
+  color: {{subtext}};
+}
+[class*=_subTitleText_] a {
+  color: {{subtext}};
+}
+[class*=_subTitleText_] a:hover {
+  color: {{text}};
+}
+
+[class*=_buttonsContainer_] [data-test=now-playing-favorite-button],
+[class*=_buttonsContainer_] [data-test=now-playing-context-menu] {
+  color: {{subtext}};
+}
+[class*=_buttonsContainer_] [data-test=now-playing-favorite-button]:hover,
+[class*=_buttonsContainer_] [data-test=now-playing-context-menu]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[class*=_tabs_][class*=_tabItems_] {
+  background-color: transparent;
+  border-color: {{overlay}};
+}
+
+[class*=_tabItem_] {
+  color: {{subtext}};
+  background-color: transparent;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+[class*=_tabItem_]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+[class*=_tabItem_] span,
+[class*=_tabItem_] [data-wave-color] {
+  color: inherit !important;
+}
+[class*=_tabItem_] svg {
+  color: inherit;
+}
+
+[class*=_tabItem_][class*=_activeTab_] {
+  color: {{text}};
+}
+
+[class*=_tabPanelStyles_] {
+  background-color: transparent;
+  color: {{text}};
+}
+
+[class*=_playQueueTab_] {
+  background-color: transparent;
+}
+
+[class*=_playQueueItemsContainer_],
+[data-test=nowplaying-playqueue] {
+  background-color: transparent;
+}
+
+[class*=_stickyHeader_] {
+  background-color: {{bg}};
+  color: {{text}};
+}
+
+[class*=_groupTitle_] {
+  color: {{text}};
+  background-color: transparent;
+}
+[class*=_groupTitle_] a {
+  color: {{secondary}};
+}
+[class*=_groupTitle_] a:hover {
+  color: {{primary}};
+}
+
+[class*=_clearButton_] {
+  color: {{subtext}};
+}
+[class*=_clearButton_]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[data-test=playqueue-item] {
+  color: {{subtext}};
+  background-color: transparent;
+}
+[data-test=playqueue-item]:hover {
+  background-color: {{border}};
+}
+
+[class*=_containerPriorityHistory_] {
+  opacity: 0.6;
+}
+[class*=_containerPriorityHistory_]:hover {
+  opacity: 1;
+}
+
+[class*=_titleLink_] {
+  color: {{text}};
+}
+[class*=_titleLink_]:hover {
+  color: {{primary}};
+}
+
+[class*=_textHigh_] {
+  color: {{primary}};
+}
+
+[class*=_nowPlayingIconContainer_] {
+  color: {{primary}};
+}
+
+[class*=_iconHigh_] {
+  color: {{primary}};
+}
+
+[class*=_artistText_] {
+  color: {{subtext}};
+}
+[class*=_artistText_] a {
+  color: {{subtext}};
+}
+[class*=_artistText_] a:hover {
+  color: {{text}};
+}
+
+[class*=_titleArtistGroup_] {
+  color: {{text}};
+}
+
+[class*=_actions_] button {
+  color: {{subtext}};
+}
+[class*=_actions_] button:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[class*=_removeButton_] {
+  color: {{subtext}};
+}
+[class*=_removeButton_]:hover {
+  color: {{error}};
+  background-color: {{border}};
+}
+
+[class*=_nowPlayingCell_] {
+  background-color: transparent;
+}
+
+[class*=_bottomGradient_] {
+  background: linear-gradient(transparent, {{bg}});
+}
+
+[class*=_dropContainer_] {
+  background-color: transparent;
+}
+
+[class*=_suggestionsTab_] {
+  background-color: transparent;
+  color: {{text}};
+}
+
+[class*=_creditsTab_] {
+  background-color: transparent;
+  color: {{text}};
+}
+[class*=_creditsTab_] [class*=_divider_] {
+  background-color: {{surface_high}} !important;
+}
+
+[data-test=mp-toggle-now-playing],
+[class*=_toggleButton_] {
+  color: {{subtext}};
+}
+[data-test=mp-toggle-now-playing]:hover,
+[class*=_toggleButton_]:hover {
+  color: {{text}};
+}
+
+[class*=_nowPlayingVisible_] {
+  background-color: inherit;
+}
+
+[class*=_toggleArrowIcon_] {
+  color: inherit;
+}
+
+[class*=_nowPlayingButton_] {
+  color: {{subtext}};
+}
+[class*=_nowPlayingButton_]:hover {
+  color: {{text}};
+}
+
+[data-test=playqueue-scroll]::-webkit-scrollbar {
+  width: 6px;
+}
+[data-test=playqueue-scroll]::-webkit-scrollbar-thumb {
+  background-color: {{border}};
+  border-radius: 3px;
+}
+[data-test=playqueue-scroll]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.os-theme-tidal .os-scrollbar-handle {
+  background-color: {{border}};
+  border-radius: 3px;
+}
+.os-theme-tidal .os-scrollbar-track {
+  background-color: transparent;
+}
+
+.settings-window {
+  --black: {{bg}};
+  --black-lighter: {{crust}};
+  --black-lightest: {{surface_high}};
+  --grey-darkest: {{overlay}};
+  --grey-darker: {{border}};
+  --grey: {{subtext}};
+  --white: {{text}};
+  --tidal-blue: {{secondary}};
+  --tidal-red: {{ansi_1}};
+  color: {{text}};
+  background: {{bg}};
+  overflow: hidden;
+}
+
+.settings-window__wrapper {
+  background: {{bg}};
+  box-shadow: inset 0 0 2px 0 {{crust}};
+}
+
+.settings-window__close-button:hover {
+  background: {{surface_high}};
+}
+
+.tabs__trigger + label {
+  color: {{subtext}};
+}
+.tabs__trigger + label:hover {
+  color: {{text}};
+}
+
+.tabs__trigger:checked + label {
+  color: {{primary}};
+}
+
+.tabs__separator {
+  border-color: {{overlay}};
+}
+
+.settings input:checked + label {
+  border-bottom: 2px solid {{primary}};
+  color: {{primary}};
+}
+
+.tabs__content::-webkit-scrollbar-thumb {
+  background-color: {{border}};
+}
+
+.group {
+  border-bottom: none;
+}
+
+.group__title {
+  color: {{text}};
+}
+
+.group__option {
+  background: {{surface_high}};
+  border-color: {{surface_high}};
+}
+
+.group__options-group {
+  background: {{surface_high}};
+  border-color: {{surface_high}};
+}
+.group__options-group .group__option {
+  border-bottom-color: {{overlay}};
+}
+
+.group__content h4 {
+  color: {{text}};
+}
+
+.group__content p,
+.group__description p {
+  color: {{subtext}};
+}
+
+.group__description .text-input {
+  border-bottom: solid 1px {{overlay}};
+  color: {{text}};
+}
+
+.group__description .text-input:focus {
+  border-color: {{primary}};
+  color: {{text}};
+}
+
+.text-input {
+  background-color: {{overlay}};
+  color: {{text}};
+  border-color: {{overlay}};
+}
+.text-input::placeholder {
+  color: {{subtext}};
+}
+
+.tags__tag {
+  background: {{overlay}};
+  color: {{text}};
+}
+.tags__tag:hover, .tags__tag:focus-within {
+  background: {{primary}};
+  color: {{on_primary}};
+}
+
+.tags__tag__text {
+  color: inherit;
+}
+
+.tags__tag__remove {
+  color: inherit;
+  opacity: 0.8;
+}
+.tags__tag__remove:hover {
+  opacity: 1;
+}
+
+.button {
+  background: {{surface_high}};
+  color: {{text}};
+  border-color: {{overlay}};
+}
+.button:hover {
+  background: {{overlay}};
+}
+.button.primary {
+  background: {{primary}};
+  color: {{on_primary}};
+}
+.button.primary:hover {
+  background: color-mix(in srgb, {{primary}} 88%, white);
+}
+
+.select-input {
+  background-color: {{surface_high}};
+  color: {{text}};
+  border-color: {{overlay}};
+}
+
+.select-input option {
+  background-color: {{surface_high}};
+}
+
+.select-input option:disabled {
+  color: {{subtext}};
+}
+
+.hotkey-binding kbd {
+  background: {{primary}};
+  color: {{bg}};
+}
+
+.hotkey-binding.editing {
+  background: {{overlay}};
+}
+
+.switch {
+  border: none;
+  background-color: transparent;
+}
+
+.switch input:checked + .switch__slider {
+  background-color: {{primary}};
+}
+
+.switch input:checked + .switch__slider::before {
+  background-color: {{bg}};
+}
+
+.switch input:focus + .switch__slider {
+  box-shadow: none;
+}
+
+.switch:has(:focus-visible) {
+  outline: 2px solid {{primary}};
+  outline-offset: 2px;
+  border-radius: 40px;
+}
+
+.switch__slider {
+  background-color: {{border}};
+}
+
+.switch__slider::before {
+  background-color: {{subtext}};
+}
+
+.textarea {
+  background: {{surface_high}};
+  color: {{subtext}};
+  border-color: {{overlay}};
+}
+
+.footer__note {
+  color: {{subtext}};
+}
+
+.footer__button {
+  color: {{secondary}};
+}
+
+.footer__button:hover {
+  color: {{ansi_2}};
+}
+
+.external-link {
+  color: {{secondary}};
+}
+.external-link:hover {
+  color: {{ansi_2}};
+}
+
+.file-msg {
+  color: {{secondary}} !important;
+}
+
+#tidal-hifi-titlebar {
+  background: {{crust}} !important;
+}
+
+[class*=sidebarWrapper] {
+  background-color: {{crust}};
+}
+
+#sidebar [class*=header_] {
+  background-color: {{crust}};
+}
+
+[class*=_sectionHeader_] {
+  background-color: {{crust}} !important;
+}
+
+[class*=logoWrapper] {
+  background-color: {{crust}};
+}
+
+[class*=logoButton],
+[data-test=sidebar-logo] {
+  color: {{text}};
+}
+
+[class*=versionBadge] {
+  color: {{subtext}};
+}
+
+[class*=submenu_] {
+  background-color: {{surface_high}};
+  border-color: {{overlay}};
+}
+
+[class*=submenuItem] {
+  color: {{subtext}};
+}
+[class*=submenuItem]:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+
+[class*=collapseButton],
+[data-test=sidebar-collapse],
+[data-test=sidebar-expand] {
+  color: {{subtext}};
+}
+[class*=collapseButton]:hover,
+[data-test=sidebar-collapse]:hover,
+[data-test=sidebar-expand]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[data-test=shortcut-list] [class*=shortcutItem] {
+  color: {{subtext}};
+}
+[data-test=shortcut-list] [class*=shortcutItem]:hover {
+  background-color: {{border}};
+}
+[data-test=shortcut-list] [class*=textWrapper] {
+  color: {{subtext}};
+}
+
+[data-test=create-folder-or-playlist] {
+  color: {{subtext}};
+}
+[data-test=create-folder-or-playlist]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[class*=_header_]::before {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: transparent !important;
+}
+
+[class*=logo_][class*=logoVisible] {
+  color: {{text}};
+}
+
+[data-test=header-profile-menu-button],
+[class*=profileMenuButton] {
+  color: {{subtext}};
+}
+[data-test=header-profile-menu-button]:hover,
+[class*=profileMenuButton]:hover {
+  color: {{text}};
+}
+
+[class*=profilePicture] {
+  border-color: {{surface_high}};
+}
+
+[class*=searchField] {
+  background-color: {{crust}};
+  color: {{text}};
+  border-color: transparent;
+  border-radius: 8px;
+}
+[class*=searchField]::placeholder {
+  color: {{subtext}};
+}
+[class*=searchField]:focus, [class*=searchField]:focus-within {
+  border-color: {{overlay}};
+  background-color: {{surface_high}};
+}
+
+[class*=searchFieldWithPopover] [class*=container] {
+  background-color: {{crust}};
+  border-color: transparent;
+  border-radius: 8px;
+}
+[class*=searchFieldWithPopover] [class*=container]:focus-within {
+  border-color: {{overlay}};
+  background-color: {{surface_high}};
+}
+
+[data-test=search-popover-container] {
+  background-color: {{surface_high}};
+}
+
+.mainContent {
+  color: {{text}};
+  background-color: {{bg}};
+}
+
+[class*=pageHeader] {
+  background-color: {{bg}};
+}
+
+[class*=feed_][data-test=home-page-feed],
+[class*=feed_] {
+  background-color: {{bg}};
+}
+
+[data-test=spotlight-banner] [class*=slide_] {
+  background-color: {{surface_high}};
+}
+[data-test=spotlight-banner] [class*=leftSection] {
+  color: {{text}};
+}
+[data-test=spotlight-banner] [class*=brandingTitle] {
+  color: {{text}};
+}
+
+[class*=cardContainer],
+[class*=card_] {
+  background-color: {{bg}};
+  transition: background-color 0.15s ease;
+}
+[class*=cardContainer]:hover,
+[class*=card_]:hover {
+  background-color: {{bg}};
+}
+
+[class*=textContent] {
+  color: {{text}};
+}
+
+[class*=subtitle] {
+  color: {{subtext}};
+}
+
+[class*=description] {
+  color: {{subtext}};
+}
+
+[class*=headerTitleContainer] {
+  color: {{text}};
+}
+
+[class*=headerText] {
+  color: {{text}};
+}
+
+[class*=marketText] {
+  color: inherit;
+}
+
+[data-test=view-all-link],
+[class*=viewAllButton] {
+  color: {{secondary}};
+}
+[data-test=view-all-link]:hover,
+[class*=viewAllButton]:hover {
+  color: {{primary}};
+}
+
+[class*=overlay] [class*=css-75d7zy] {
+  background-color: {{primary}};
+  color: {{crust}};
+}
+
+[class*=playButtonContainer] [class*=playButtonInner] {
+  background-color: {{primary}};
+}
+
+[class*=headerContainer] {
+  background-color: {{bg}};
+}
+
+[class*=detailContainer] {
+  background-color: {{bg}};
+}
+
+[class*=sortButton] {
+  color: {{subtext}};
+}
+[class*=sortButton]:hover {
+  color: {{text}};
+}
+
+[class*=trackListWrapper] {
+  background-color: {{bg}};
+}
+
+[data-test=tracklist-row],
+[class*=trackRow_] {
+  color: {{subtext}};
+}
+[data-test=tracklist-row]:hover,
+[class*=trackRow_]:hover {
+  background-color: {{border}};
+  color: {{text}};
+}
+[data-test=tracklist-row][data-status=playing], [data-test=tracklist-row][data-test-is-playing=true],
+[class*=trackRow_][data-status=playing],
+[class*=trackRow_][data-test-is-playing=true] {
+  color: {{on_primary_container}};
+  background-color: {{primary_container}};
+}
+
+[class*=album] {
+  color: {{subtext}};
+}
+
+[class*=favoriteButton] {
+  color: {{subtext}};
+}
+[class*=favoriteButton]:hover {
+  color: {{ansi_1}};
+}
+[class*=favoriteButton][aria-checked=true] {
+  color: {{ansi_1}};
+}
+
+[data-test=explicit-badge],
+[class*=explicitBadge],
+[data-test=quality-badge-LOSSLESS],
+[class*=qualityBadgeContainer] {
+  color: {{subtext}};
+}
+
+#footerPlayer [class*=background_] {
+  background-color: {{crust}} !important;
+}
+
+[class*=playerContent] {
+  background-color: {{crust}};
+}
+
+[data-test=track-info],
+[class*=trackInfo] {
+  color: {{text}};
+}
+
+[class*=artworkContainer],
+[data-test=player-details-toggle-now-playing] {
+  border-color: {{surface_high}};
+}
+
+[class*=trackContent] {
+  color: {{text}};
+}
+
+[class*=titleArtistStack] {
+  color: {{text}};
+}
+
+[class*=titleContainer] a {
+  color: {{text}};
+}
+[class*=titleContainer] a:hover {
+  color: {{primary}};
+}
+
+[class*=artist_] [class*=item_],
+[class*=artist_] [class*=link_] {
+  color: {{subtext}};
+}
+[class*=artist_] [class*=item_]:hover,
+[class*=artist_] [class*=link_]:hover {
+  color: {{text}};
+}
+
+[class*=playingFromText] a {
+  color: {{secondary}};
+}
+[class*=playingFromText] a:hover {
+  color: {{primary}};
+}
+
+#footerPlayer [class*=actions_] button {
+  color: {{subtext}};
+}
+#footerPlayer [class*=actions_] button:hover {
+  color: {{text}};
+}
+
+[class*=blockButton] {
+  color: {{subtext}};
+}
+[class*=blockButton]:hover {
+  color: {{text}};
+}
+
+[class*=contextMenuButton] {
+  color: {{subtext}};
+}
+[class*=contextMenuButton]:hover {
+  color: {{text}};
+}
+
+[class*=centerSection] {
+  background-color: transparent;
+}
+
+#playbackControlBar button[aria-checked=true] path,
+[data-test=play-controls] button[aria-checked=true] path {
+  fill: {{primary}};
+}
+#playbackControlBar button.withBackground, #playbackControlBar button[class*=activeButton],
+[data-test=play-controls] button.withBackground,
+[data-test=play-controls] button[class*=activeButton] {
+  background-color: {{surface_high}};
+}
+
+[class*=shuffleButton][aria-checked=true],
+[data-test=shuffle][aria-checked=true] {
+  color: {{primary}};
+}
+
+[class*=repeatButton][aria-checked=true],
+[data-test=repeat][aria-checked=true] {
+  color: {{primary}};
+}
+
+[class*=skipButton] {
+  color: {{subtext}};
+}
+[class*=skipButton]:hover {
+  color: {{text}};
+}
+
+[class*=playbackButton],
+[data-test=play-controls] [class*=playButtonInner] {
+  color: {{text}};
+  background-color: transparent;
+}
+
+[class*=scrubberRow] {
+  color: {{subtext}};
+}
+
+[class*=scrubberBar] {
+  background-color: {{border}};
+}
+
+[class*=scrubberTime],
+[class*=scrubberTimeText] {
+  color: {{subtext}};
+}
+
+[class*=fillingBlock][class*=indicator] {
+  background-color: {{primary}};
+}
+
+[class*=fillingBlock][class*=range] {
+  background-color: {{border}};
+}
+
+[class*=knob] {
+  background-color: {{primary}};
+}
+
+[class*=toolTip] {
+  background-color: {{overlay}};
+  color: {{text}};
+}
+
+[class*=rightSection] {
+  color: {{subtext}};
+}
+
+[class*=utilityContainer] {
+  color: {{subtext}};
+}
+
+[class*=utilityButtons] button {
+  color: {{subtext}};
+}
+[class*=utilityButtons] button:hover {
+  color: {{text}};
+}
+
+[data-test=play-queue-button] {
+  color: {{subtext}};
+  background-color: transparent !important;
+}
+[data-test=play-queue-button]:hover {
+  color: {{text}};
+}
+[data-test=play-queue-button][aria-pressed=true] {
+  color: {{primary}};
+}
+
+[data-test=volume] {
+  color: {{subtext}};
+}
+[data-test=volume]:hover {
+  color: {{text}};
+}
+
+[class*=sliderContainer] {
+  background-color: transparent;
+}
+
+[class*=newNowPlaying] {
+  background-color: {{bg}} !important;
+  background-image: none !important;
+  --market-button-focus-ring-color: transparent;
+  --market-core-focus-ring-color: {{primary}};
+}
+
+[data-test=now-playing-similar-tracks] [class*=radioSection] [class*=card_] {
+  background-color: transparent;
+}
+[data-test=now-playing-similar-tracks] [class*=radioSection] [class*=contentContainer] {
+  color: {{subtext}};
+}
+[data-test=now-playing-similar-tracks] [class*=radioSection] [class*=subtitle] {
+  color: {{subtext}};
+}
+
+[data-test=now-playing-mixes-and-radio-header],
+[data-test=now-playing-mixes-and-radio-scroll] {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-test=now-playing-mixes-and-radio-scroll] [class*=card] {
+  background-color: transparent !important;
+}
+
+#playQueueSidebar {
+  background-color: {{crust}} !important;
+  background: {{crust}} !important;
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#playQueueSidebar > * {
+  background-color: {{crust}} !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[class*=playQueueWrapper] {
+  background-color: {{crust}};
+}
+
+[data-test=playqueue-header] {
+  background-color: {{crust}};
+}
+[data-test=playqueue-header] [class*=headerButton] {
+  color: {{subtext}};
+}
+[data-test=playqueue-header] [class*=headerButton]:hover {
+  color: {{text}};
+}
+
+[data-test=playqueue-save-button],
+[data-test=playqueue-close-button] {
+  color: {{subtext}};
+}
+[data-test=playqueue-save-button]:hover,
+[data-test=playqueue-close-button]:hover {
+  color: {{text}};
+}
+
+[data-test=playqueue-title] {
+  color: {{text}};
+}
+
+[class*=playQueueItemsContainer],
+[data-test=playqueue] {
+  background-color: transparent;
+}
+
+[class*=playQueueItems] {
+  background-color: transparent;
+}
+
+#playQueueSidebar [class*=stickyHeader] {
+  background-color: {{crust}};
+  color: {{text}};
+}
+
+[data-test=playqueue-item] {
+  color: {{subtext}};
+  background-color: transparent;
+  border-bottom: 1px solid {{surface_high}};
+}
+[data-test=playqueue-item]:hover {
+  background-color: {{border}};
+}
+[data-test=playqueue-item] img {
+  border-radius: 4px;
+}
+[data-test=playqueue-item] [class*=artist] {
+  color: {{subtext}};
+}
+[data-test=playqueue-item] [class*=duration] {
+  color: {{subtext}};
+}
+
+[class*=dragHandle] {
+  color: {{subtext}};
+}
+[class*=dragHandle]:hover {
+  color: {{text}};
+}
+
+[data-test=playqueue-item] [class*=more],
+[data-test=playqueue-item] [class*=menu] {
+  color: {{subtext}};
+}
+[data-test=playqueue-item] [class*=more]:hover,
+[data-test=playqueue-item] [class*=menu]:hover {
+  color: {{text}};
+}
+
+#playQueueSidebar [class*=actions_] button {
+  color: {{subtext}};
+}
+#playQueueSidebar [class*=actions_] button:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+[class*=removeButton],
+[data-test=remove-button] {
+  color: {{subtext}};
+}
+[class*=removeButton]:hover,
+[data-test=remove-button]:hover {
+  color: {{ansi_1}};
+  background-color: {{border}};
+}
+
+[class*=bottomGradient] {
+  background: linear-gradient(transparent, {{crust}});
+}
+
+[data-test=playqueue-scroll]::-webkit-scrollbar {
+  width: 6px;
+}
+[data-test=playqueue-scroll]::-webkit-scrollbar-thumb {
+  background-color: {{border}};
+  border-radius: 3px;
+}
+[data-test=playqueue-scroll]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+[class*=notificationWrapper] {
+  color: {{text}};
+}
+
+[class*=marketButton][class*=primary] {
+  background-color: {{primary}};
+  color: {{crust}};
+}
+[class*=marketButton][class*=primary]:hover {
+  opacity: 0.9;
+}
+[class*=marketButton][class*=secondary] {
+  background-color: {{surface_high}};
+  color: {{text}};
+  border-color: {{overlay}};
+}
+[class*=marketButton][class*=secondary]:hover {
+  background-color: {{border}};
+}
+[class*=marketButton][class*=tertiary] {
+  color: {{subtext}};
+}
+[class*=marketButton][class*=tertiary]:hover {
+  color: {{text}};
+  background-color: {{border}};
+}
+
+#tidal-hifi-titlebar {
+  background: {{crust}} !important;
+}

@@ -490,3 +490,402 @@ mod desktop_tokens {
         );
     }
 }
+
+mod zed_theme {
+    use velure::apps::{App, zed};
+    use velure::color::Color;
+    use velure::harmony;
+    use velure::palette::{self, Mode, Options, Style};
+    use velure::tokens::{Tokens, derive};
+
+    const IMAGES: [&[[u8; 3]]; 4] = [
+        &[[160, 140, 210], [230, 220, 245], [40, 35, 70]],
+        &[[20, 70, 160], [220, 120, 30], [15, 20, 30]],
+        &[[128, 128, 128], [30, 30, 30], [230, 230, 230]],
+        &[[250, 20, 20], [240, 240, 240], [5, 5, 5]],
+    ];
+
+    fn tokens(colors: &[[u8; 3]], style: Style) -> Tokens {
+        let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
+            image::Rgb(colors[x as usize / 40])
+        });
+        let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+        derive(&palette::build(
+            &harmony::analyze(clusters),
+            &Options {
+                source: "prueba".into(),
+                mode: Some(Mode::Dark),
+                style,
+                scheme: None,
+            },
+        ))
+    }
+
+    fn hex(s: &str) -> Color {
+        let v = u32::from_str_radix(&s[1..7], 16).unwrap();
+        Color {
+            r: (v >> 16) as u8,
+            g: (v >> 8) as u8,
+            b: v as u8,
+        }
+    }
+
+    /// `fg` drawn over `bg` with an `alpha` tint of `tint` in between.
+    fn over(tint: Color, alpha: f64, bg: Color) -> Color {
+        let mix =
+            |a: u8, b: u8| (f64::from(a) * alpha + f64::from(b) * (1.0 - alpha)).round() as u8;
+        Color {
+            r: mix(tint.r, bg.r),
+            g: mix(tint.g, bg.g),
+            b: mix(tint.b, bg.b),
+        }
+    }
+
+    #[test]
+    fn writes_a_complete_zed_theme() {
+        let theme: serde_json::Value =
+            serde_json::from_str(&zed::render(&tokens(IMAGES[0], Style::Balanced))).unwrap();
+        let style = &theme["themes"][0]["style"];
+        assert_eq!(theme["themes"][0]["appearance"], "dark");
+        assert!(style.as_object().unwrap().len() > 150);
+        for (key, value) in style.as_object().unwrap() {
+            if let Some(s) = value.as_str() {
+                let ok = s.starts_with('#') && (s.len() == 7 || s.len() == 9);
+                assert!(
+                    ok && s[1..].chars().all(|c| c.is_ascii_hexdigit()),
+                    "{key}: {s}"
+                );
+            }
+        }
+        assert_eq!(style["players"].as_array().unwrap().len(), 4);
+    }
+
+    #[test]
+    fn each_kind_of_code_has_its_own_token() {
+        let t = tokens(IMAGES[1], Style::Balanced);
+        let theme: serde_json::Value = serde_json::from_str(&zed::render(&t)).unwrap();
+        let syntax = &theme["themes"][0]["style"]["syntax"];
+        for (kind, token) in [
+            ("keyword", "syntax_keyword"),
+            ("function", "syntax_function"),
+            ("type", "syntax_type"),
+            ("string", "syntax_string"),
+            ("number", "syntax_number"),
+            ("property", "syntax_property"),
+            ("comment", "muted"),
+        ] {
+            assert_eq!(syntax[kind]["color"], t.get(token).unwrap().hex(), "{kind}");
+        }
+    }
+
+    #[test]
+    fn code_stays_legible_when_selected() {
+        let code = [
+            "syntax_keyword",
+            "syntax_function",
+            "syntax_type",
+            "syntax_string",
+            "syntax_number",
+            "syntax_property",
+            "text",
+        ];
+        for colors in IMAGES {
+            for style in [Style::Sober, Style::Balanced, Style::Expressive] {
+                let t = tokens(colors, style);
+                let theme: serde_json::Value = serde_json::from_str(&zed::render(&t)).unwrap();
+                let selection = theme["themes"][0]["style"]["players"][0]["selection"]
+                    .as_str()
+                    .unwrap();
+                let alpha = f64::from(u8::from_str_radix(&selection[7..9], 16).unwrap()) / 255.0;
+                let ground = over(hex(selection), alpha, t.get("bg").unwrap());
+                for name in code {
+                    let ratio = t.get(name).unwrap().contrast(ground);
+                    assert!(ratio >= 3.0, "{name} sobre la selección: {ratio:.2}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn usage_names_real_tokens() {
+        let t = tokens(IMAGES[0], Style::Balanced);
+        for app in App::ALL {
+            for (name, _) in app.usage() {
+                assert!(t.get(name).is_some(), "{} usa {name}", app.name());
+            }
+        }
+    }
+}
+
+mod kitty_theme {
+    use velure::apps::kitty;
+    use velure::harmony;
+    use velure::palette::{self, Mode, Options, Style};
+    use velure::tokens::{Tokens, derive};
+
+    const IMAGES: [&[[u8; 3]]; 4] = [
+        &[[160, 140, 210], [230, 220, 245], [40, 35, 70]],
+        &[[20, 70, 160], [220, 120, 30], [15, 20, 30]],
+        &[[128, 128, 128], [30, 30, 30], [230, 230, 230]],
+        &[[250, 20, 20], [240, 240, 240], [5, 5, 5]],
+    ];
+
+    fn tokens(colors: &[[u8; 3]], style: Style) -> Tokens {
+        let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
+            image::Rgb(colors[x as usize / 40])
+        });
+        let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+        derive(&palette::build(
+            &harmony::analyze(clusters),
+            &Options {
+                source: "prueba".into(),
+                mode: Some(Mode::Dark),
+                style,
+                scheme: None,
+            },
+        ))
+    }
+
+    #[test]
+    fn every_setting_is_a_colour() {
+        let conf = kitty::render(&tokens(IMAGES[0], Style::Balanced));
+        let settings: Vec<&str> = conf
+            .lines()
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .collect();
+        assert_eq!(settings.len(), 21 + 16);
+        for line in settings {
+            let value = line.split_whitespace().nth(1).unwrap();
+            assert!(value.len() == 7 && value.starts_with('#'), "{line}");
+        }
+        for n in 0..16 {
+            assert!(
+                conf.lines()
+                    .any(|l| l.split_whitespace().next() == Some(&format!("color{n}")))
+            );
+        }
+    }
+
+    #[test]
+    fn what_kitty_draws_together_is_legible() {
+        for colors in IMAGES {
+            for style in [Style::Sober, Style::Balanced, Style::Expressive] {
+                let t = tokens(colors, style);
+                for (fg, bg) in kitty::READABLE_PAIRS {
+                    let ratio = t.get(fg).unwrap().contrast(t.get(bg).unwrap());
+                    assert!(ratio >= 4.5, "{fg} sobre {bg}: {ratio:.2}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn terminal_colours_are_the_palette_ansi() {
+        let t = tokens(IMAGES[1], Style::Balanced);
+        let conf = kitty::render(&t);
+        for n in 0..16 {
+            let line = conf
+                .lines()
+                .find(|l| l.split_whitespace().next() == Some(&format!("color{n}")))
+                .unwrap();
+            assert!(line.ends_with(&t.get(&format!("ansi_{n}")).unwrap().hex()));
+        }
+    }
+}
+
+mod shell_apps {
+    use velure::apps::{eza, fastfetch, fish, gtk, starship, web};
+    use velure::harmony;
+    use velure::palette::{self, Mode, Options, Style};
+    use velure::tokens::{Tokens, derive};
+
+    fn tokens(colors: &[[u8; 3]]) -> Tokens {
+        let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
+            image::Rgb(colors[x as usize / 40])
+        });
+        let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+        derive(&palette::build(
+            &harmony::analyze(clusters),
+            &Options {
+                source: "prueba".into(),
+                mode: Some(Mode::Dark),
+                style: Style::Sober,
+                scheme: None,
+            },
+        ))
+    }
+
+    fn sober() -> Tokens {
+        tokens(&[[128, 128, 128], [30, 30, 30], [230, 230, 230]])
+    }
+
+    #[test]
+    fn fish_highlighting_uses_the_separated_code_colours() {
+        let t = sober();
+        let conf = fish::render(&t);
+        let value = |var: &str| {
+            conf.lines()
+                .find(|l| l.split_whitespace().nth(2) == Some(var))
+                .and_then(|l| l.split('\'').nth(1))
+                .unwrap()
+                .to_string()
+        };
+        assert_eq!(
+            value("fish_color_command"),
+            t.get("syntax_function").unwrap().hex()
+        );
+        assert_eq!(
+            value("fish_color_operator"),
+            t.get("syntax_type").unwrap().hex()
+        );
+        assert_eq!(value("fish_color_comment"), t.get("muted").unwrap().hex());
+        assert!(conf.contains("set -g fish_color_valid_path --underline"));
+    }
+
+    #[test]
+    fn starship_palette_is_valid_toml_with_every_name() {
+        let t = sober();
+        let parsed: toml::Table = toml::from_str(&starship::render(&t)).unwrap();
+        let palette = parsed["palettes"]["velure"].as_table().unwrap();
+        for name in [
+            "primary",
+            "accent",
+            "accent_alt",
+            "ok",
+            "warn",
+            "err",
+            "muted",
+        ] {
+            assert!(palette[name].as_str().unwrap().starts_with('#'), "{name}");
+        }
+        assert_ne!(palette["accent"].as_str(), palette["muted"].as_str());
+    }
+
+    #[test]
+    fn fastfetch_keeps_the_modules_and_sets_only_colours() {
+        let t = sober();
+        let base = r#"{
+            // la base del usuario
+            "logo": { "source": "arch.txt", "padding": { "right": 6 } },
+            "modules": ["title", { "type": "os", "key": " ", "keyColor": "red", },],
+        }"#;
+        let out = fastfetch::render(&t, base).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&fastfetch::strip_jsonc(&out)).unwrap();
+        let primary = t.get("primary").unwrap().hex();
+        assert_eq!(json["logo"]["source"], "arch.txt");
+        assert_eq!(json["logo"]["padding"]["right"], 6);
+        assert_eq!(json["logo"]["color"]["1"], primary);
+        assert_eq!(json["display"]["color"]["keys"], primary);
+        assert_eq!(json["display"]["color"]["title"], primary);
+        assert_eq!(json["modules"][1]["key"], " ");
+        assert!(json["modules"][1].get("keyColor").is_none());
+    }
+
+    #[test]
+    fn eza_keeps_long_listings_calm() {
+        let t = sober();
+        let theme = eza::render(&t);
+        let perms = theme
+            .split("perms:")
+            .nth(1)
+            .unwrap()
+            .split("\n\n")
+            .next()
+            .unwrap();
+        let neutral = [
+            t.get("subtext").unwrap().hex(),
+            t.get("muted").unwrap().hex(),
+        ];
+        let coloured: Vec<&str> = perms
+            .lines()
+            .filter(|l| l.contains("foreground"))
+            .filter(|l| !neutral.iter().any(|n| l.contains(n.as_str())))
+            .collect();
+        assert_eq!(
+            coloured.len(),
+            3,
+            "solo escritura para todos y setuid: {coloured:?}"
+        );
+        for line in theme.lines().filter(|l| l.contains("foreground")) {
+            let value = line.split('"').nth(1).unwrap();
+            assert!(value.len() == 7 && value.starts_with('#'), "{line}");
+        }
+    }
+
+    #[test]
+    fn gtk_fills_carry_their_own_text() {
+        for colors in [
+            &[[160, 140, 210], [230, 220, 245], [40, 35, 70]][..],
+            &[[20, 70, 160], [220, 120, 30], [15, 20, 30]][..],
+            &[[128, 128, 128], [30, 30, 30], [230, 230, 230]][..],
+        ] {
+            let t = tokens(colors);
+            for (fg, bg) in gtk::READABLE_PAIRS {
+                let ratio = t.get(fg).unwrap().contrast(t.get(bg).unwrap());
+                assert!(ratio >= 4.5, "{fg} sobre {bg}: {ratio:.2}");
+            }
+        }
+        let t = sober();
+        let gtk3 = gtk::render(&t, false);
+        let gtk4 = gtk::render(&t, true);
+        assert!(gtk3.contains(&format!(
+            "@define-color success_fg_color {};",
+            t.get("on_success").unwrap().hex()
+        )));
+        assert!(!gtk3.contains(":root"));
+        assert!(gtk4.contains(&format!(
+            "--accent-bg-color: {};",
+            t.get("primary").unwrap().hex()
+        )));
+        assert!(gtk4.contains("--border-color:"));
+        assert_eq!(
+            gtk4.matches("@define-color").count(),
+            gtk3.matches("@define-color").count()
+        );
+    }
+
+    #[test]
+    fn firefox_and_tidal_name_only_real_tokens_and_read_well() {
+        for colors in [
+            &[[160, 140, 210], [230, 220, 245], [40, 35, 70]][..],
+            &[[20, 70, 160], [220, 120, 30], [15, 20, 30]][..],
+            &[[128, 128, 128], [30, 30, 30], [230, 230, 230]][..],
+        ] {
+            let t = tokens(colors);
+            for (name, css) in web::FIREFOX {
+                let out = web::render(css, &t).unwrap_or_else(|e| panic!("{name}: {e}"));
+                assert!(!out.contains("{{"), "{name}");
+            }
+            let tidal = web::render(web::TIDAL, &t).unwrap();
+            assert!(!tidal.contains("{{"));
+            for (fg, bg) in web::TIDAL_READABLE.iter().chain(web::FIREFOX_READABLE) {
+                let ratio = t.get(fg).unwrap().contrast(t.get(bg).unwrap());
+                assert!(ratio >= 4.5, "{fg} sobre {bg}: {ratio:.2}");
+            }
+        }
+    }
+
+    #[test]
+    fn firefox_keeps_the_alpha_its_translucency_script_rewrites() {
+        // translucent.sh replaces "e0 !important" with the opacity chosen in the shell.
+        let t = sober();
+        let (_, css) = web::FIREFOX
+            .iter()
+            .find(|(n, _)| *n == "firefox-translucent.css")
+            .unwrap();
+        let out = web::render(css, &t).unwrap();
+        assert!(out.contains(&format!("{}e0 !important", t.get("bg").unwrap().hex())));
+    }
+
+    #[test]
+    fn tidal_marks_what_plays_on_the_selection_colour() {
+        let t = sober();
+        let tidal = web::render(web::TIDAL, &t).unwrap();
+        let container = t.get("primary_container").unwrap().hex();
+        assert!(tidal.contains(&format!("background-color: {container};")));
+        assert!(!tidal.contains(&format!(
+            "background-color: {};",
+            t.get("outline").unwrap().hex()
+        )));
+    }
+}
