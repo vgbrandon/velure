@@ -1,22 +1,31 @@
 use std::io::IsTerminal;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use anyhow::{Result, bail};
-use clap::{Parser, ValueEnum};
+use anyhow::{Context, Result, bail};
+use clap::{Parser, Subcommand, ValueEnum};
 
 use velure::export::{self, Context_, Format};
 use velure::harmony::{self, Scheme};
 use velure::palette::{self, Mode, Options, Style};
 use velure::terminal::{self, Painter};
-use velure::{audit, extract};
+use velure::{audit, extract, tokens};
 
 /// Crea temas de ricing elegantes a partir de una imagen.
 #[derive(Parser)]
-#[command(version, about)]
+#[command(
+    version,
+    about,
+    args_conflicts_with_subcommands = true,
+    subcommand_negates_reqs = true
+)]
 struct Cli {
+    #[command(subcommand)]
+    comando: Option<Comando>,
+
     /// Imagen de origen (jpg, png, webp, gif, bmp o tiff)
-    imagen: PathBuf,
+    #[arg(required = true)]
+    imagen: Option<PathBuf>,
 
     /// Modo del tema; por defecto se elige según la luminosidad de la imagen
     #[arg(short, long, value_enum)]
@@ -43,6 +52,27 @@ struct Cli {
     json: bool,
 }
 
+#[derive(Subcommand)]
+enum Comando {
+    /// Escribe los tokens y su origen, los datos que muestran las guías de color
+    Tokens {
+        /// Imagen de origen
+        imagen: PathBuf,
+
+        /// Intensidad del color
+        #[arg(short, long, value_enum, default_value = "equilibrado")]
+        estilo: Style,
+
+        /// Fuerza una armonía; por defecto se detecta en la imagen
+        #[arg(short, long, value_enum)]
+        armonia: Option<Scheme>,
+
+        /// Archivo de salida; por defecto, stdout
+        #[arg(short = 'o', long, value_name = "ARCHIVO")]
+        salida: Option<PathBuf>,
+    },
+}
+
 fn parse_formats(raw: &[String]) -> Result<Vec<Format>> {
     let mut out = Vec::new();
     for name in raw {
@@ -67,8 +97,56 @@ fn parse_formats(raw: &[String]) -> Result<Vec<Format>> {
     Ok(out)
 }
 
+/// The dark palette behind the desktop theme, and the image's absolute path.
+fn desktop_palette(
+    imagen: &Path,
+    style: Style,
+    scheme: Option<Scheme>,
+) -> Result<(palette::Palette, String)> {
+    let absolute = std::fs::canonicalize(imagen)
+        .with_context(|| format!("no se pudo abrir {}", imagen.display()))?;
+    let clusters = extract::clusters(&extract::load(&absolute)?);
+    if clusters.is_empty() {
+        bail!("la imagen no tiene píxeles visibles");
+    }
+    let source = absolute.to_string_lossy().into_owned();
+    let palette = palette::build(
+        &harmony::analyze(clusters),
+        &Options {
+            source: source.clone(),
+            mode: Some(Mode::Dark),
+            style,
+            scheme,
+        },
+    );
+    Ok((palette, source))
+}
+
 fn run(cli: Cli) -> Result<()> {
-    let imagen = cli.imagen;
+    match cli.comando {
+        Some(Comando::Tokens {
+            imagen,
+            estilo,
+            armonia,
+            salida,
+        }) => {
+            let (palette, source) = desktop_palette(&imagen, estilo, armonia)?;
+            let text = serde_json::to_string_pretty(&tokens::guide(&palette, &source))?;
+            match salida {
+                Some(path) => {
+                    if let Some(dir) = path.parent() {
+                        std::fs::create_dir_all(dir)?;
+                    }
+                    std::fs::write(&path, text)
+                        .with_context(|| format!("no se pudo escribir {}", path.display()))?;
+                }
+                None => println!("{text}"),
+            }
+            return Ok(());
+        }
+        None => {}
+    }
+    let imagen = cli.imagen.expect("clap exige la imagen sin subcomando");
     let formats = parse_formats(&cli.exportar)?;
     let img = extract::load(&imagen)?;
     let clusters = extract::clusters(&img);

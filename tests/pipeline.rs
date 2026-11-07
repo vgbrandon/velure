@@ -301,3 +301,192 @@ fn every_exporter_writes_real_colours() {
         assert!(!s.contains("%%"), "{f:?} dejó marcadores sin reemplazar");
     }
 }
+
+mod desktop_tokens {
+    use velure::color::{Color, hue_diff};
+    use velure::harmony;
+    use velure::palette::{self, Mode, Options, Palette, Style};
+    use velure::tokens::{CONTRAST_RULES, Tokens, derive, guide};
+
+    fn palette(colors: &[[u8; 3]], style: Style) -> Palette {
+        let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
+            image::Rgb(colors[x as usize / 40])
+        });
+        let clusters = velure::extract::clusters(&image::DynamicImage::ImageRgb8(img));
+        palette::build(
+            &harmony::analyze(clusters),
+            &Options {
+                source: "prueba".into(),
+                mode: Some(Mode::Dark),
+                style,
+                scheme: None,
+            },
+        )
+    }
+
+    fn get(t: &Tokens, name: &str) -> Color {
+        t.get(name).unwrap_or_else(|| panic!("falta {name}"))
+    }
+
+    const IMAGES: [&[[u8; 3]]; 5] = [
+        &[[160, 140, 210], [230, 220, 245], [40, 35, 70]],
+        &[[20, 70, 160], [220, 120, 30], [15, 20, 30]],
+        &[
+            [190, 40, 40],
+            [40, 170, 70],
+            [40, 60, 200],
+            [240, 210, 60],
+            [20, 20, 20],
+        ],
+        &[[128, 128, 128], [30, 30, 30], [230, 230, 230]],
+        &[[250, 20, 20], [240, 240, 240], [5, 5, 5]],
+    ];
+    const STYLES: [Style; 3] = [Style::Sober, Style::Balanced, Style::Expressive];
+
+    #[test]
+    fn every_contrast_rule_holds() {
+        for colors in IMAGES {
+            for style in STYLES {
+                let failures = derive(&palette(colors, style)).contrast_failures();
+                assert!(failures.is_empty(), "{failures:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn contrast_rules_name_real_tokens() {
+        let t = derive(&palette(IMAGES[0], Style::Balanced));
+        for (fg, bg, _) in CONTRAST_RULES {
+            get(&t, fg);
+            get(&t, bg);
+        }
+    }
+
+    #[test]
+    fn each_name_appears_once() {
+        let t = derive(&palette(IMAGES[0], Style::Balanced));
+        let mut names: Vec<&str> = t.iter().map(|(n, _)| n).collect();
+        names.sort_unstable();
+        let total = names.len();
+        names.dedup();
+        assert_eq!(names.len(), total);
+    }
+
+    #[test]
+    fn elevation_climbs_step_by_step() {
+        for colors in IMAGES {
+            for style in STYLES {
+                let t = derive(&palette(colors, style));
+                let ladder = [
+                    "crust",
+                    "bg",
+                    "surface_low",
+                    "surface",
+                    "surface_high",
+                    "overlay",
+                    "border",
+                ];
+                for pair in ladder.windows(2) {
+                    assert!(
+                        get(&t, pair[1]).to_lch().l > get(&t, pair[0]).to_lch().l,
+                        "{} no sube sobre {}",
+                        pair[1],
+                        pair[0]
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn ansi_is_the_palette_itself() {
+        let p = palette(IMAGES[1], Style::Balanced);
+        let t = derive(&p);
+        for (i, color) in p.ansi.iter().enumerate() {
+            assert_eq!(get(&t, &format!("ansi_{i}")), *color);
+        }
+    }
+
+    #[test]
+    fn gradient_stays_in_one_family_on_contrasting_themes() {
+        for colors in IMAGES {
+            let p = palette(colors, Style::Expressive);
+            let t = derive(&p);
+            let h = p.accents.primary.to_lch().h;
+            for i in 0..8 {
+                let c = get(&t, &format!("gradient_{i}")).to_lch();
+                assert!(hue_diff(h, c.h).abs() <= 40.0, "paso {i}: {} vs {h}", c.h);
+            }
+        }
+    }
+
+    #[test]
+    fn kinds_of_code_are_told_apart() {
+        let code = [
+            "syntax_keyword",
+            "syntax_function",
+            "syntax_type",
+            "syntax_string",
+            "syntax_number",
+            "syntax_property",
+        ];
+        for colors in IMAGES {
+            for style in STYLES {
+                let t = derive(&palette(colors, style));
+                for (i, name) in code.iter().enumerate() {
+                    let c = get(&t, name);
+                    for other in code[i + 1..].iter().chain(&["text", "subtext", "muted"]) {
+                        let gap = c.delta_e(get(&t, other));
+                        assert!(gap >= 0.05, "{name} y {other} a {gap:.3}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn code_keeps_the_accents_when_they_already_stand_out() {
+        let p = palette(IMAGES[1], Style::Expressive);
+        let t = derive(&p);
+        assert_eq!(get(&t, "syntax_keyword"), p.accents.primary);
+    }
+
+    #[test]
+    fn guide_names_the_closest_image_colour_as_origin() {
+        let p = palette(IMAGES[1], Style::Balanced);
+        let g = guide(&p, "/f.jpg");
+        assert_eq!(g["image"], "/f.jpg");
+        let base = g["origins"]["primary"]
+            .as_str()
+            .expect("el primario sale de la imagen");
+        assert!(
+            g["image_colors"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|c| c == base),
+            "el origen debe aparecer entre los colores que muestra la guía"
+        );
+        let target = p.accents.primary.to_lch().h;
+        let best = p
+            .meta
+            .image_colors
+            .iter()
+            .map(|c| c.color.to_lch())
+            .filter(|c| c.c >= 0.03)
+            .map(|c| hue_diff(c.h, target).abs())
+            .fold(f64::MAX, f64::min);
+        let shown = p
+            .meta
+            .image_colors
+            .iter()
+            .find(|c| c.color.hex() == base)
+            .unwrap()
+            .color;
+        let got = hue_diff(shown.to_lch().h, target).abs();
+        assert!(
+            (got - best).abs() < 1e-9,
+            "origen a {got:.0}°, el más cercano a {best:.0}°"
+        );
+    }
+}
