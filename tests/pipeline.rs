@@ -307,7 +307,7 @@ mod desktop_tokens {
     use velure::color::{Color, hue_diff};
     use velure::harmony;
     use velure::palette::{self, Mode, Options, Palette, Style};
-    use velure::tokens::{CONTRAST_RULES, Tokens, derive, guide};
+    use velure::tokens::{APCA_RULES, CONTRAST_RULES, SYNTAX_MIN_APCA, Tokens, derive, guide};
 
     fn palette(colors: &[[u8; 3]], style: Style) -> Palette {
         let img = image::RgbImage::from_fn(colors.len() as u32 * 40, 40, |x, _| {
@@ -406,9 +406,30 @@ mod desktop_tokens {
     }
 
     #[test]
+    fn code_colours_reach_the_editor_contrast() {
+        for colors in IMAGES {
+            for style in STYLES {
+                for t in [
+                    derive(&palette(colors, style)),
+                    derive(&light(colors, style)),
+                ] {
+                    let bg = get(&t, "bg");
+                    for (name, _, min) in APCA_RULES {
+                        let lc = get(&t, name).apca(bg);
+                        assert!(lc >= *min, "{name}: Lc {lc:.1}");
+                    }
+                    // Comments stay the quietest kind of code
+                    let comment = get(&t, "syntax_comment").apca(bg);
+                    assert!(comment <= get(&t, "subtext").apca(bg).max(SYNTAX_MIN_APCA + 1.0));
+                }
+            }
+        }
+    }
+
+    #[test]
     fn contrast_rules_name_real_tokens() {
         let t = derive(&palette(IMAGES[0], Style::Balanced));
-        for (fg, bg, _) in CONTRAST_RULES {
+        for (fg, bg, _) in CONTRAST_RULES.iter().chain(APCA_RULES) {
             get(&t, fg);
             get(&t, bg);
         }
@@ -624,10 +645,14 @@ mod zed_theme {
             ("string", "syntax_string"),
             ("number", "syntax_number"),
             ("property", "syntax_property"),
-            ("comment", "muted"),
+            ("comment", "syntax_comment"),
         ] {
             assert_eq!(syntax[kind]["color"], t.get(token).unwrap().hex(), "{kind}");
         }
+        assert_eq!(
+            theme["themes"][0]["style"]["accents"][0],
+            t.get("syntax_keyword").unwrap().hex()
+        );
     }
 
     #[test]

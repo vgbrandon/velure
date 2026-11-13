@@ -2,7 +2,8 @@
 //! it when the file changes.
 //!
 //! Every colour names a token, so the decisions made in `tokens` reach the editor intact:
-//! code kinds use the `syntax_*` tokens, which are kept apart from each other and from text.
+//! code kinds use the `syntax_*` tokens, which are kept apart from each other and from text,
+//! and reach the APCA contrast below which Zed would lighten them on its own.
 
 use serde_json::{Map, Value, json};
 
@@ -206,11 +207,23 @@ const PLAYERS: &[[(&str, Paint); 3]] = &[
     ],
 ];
 
+/// Bracket pairs and indent guides when Zed colours them (`colorize_brackets`): without
+/// them it would use its own palette. The code colours and not the accents, which can fall
+/// short of the contrast at which Zed would change them.
+const ACCENTS: &[Paint] = &[
+    Tok("syntax_keyword", None),
+    Tok("syntax_function", None),
+    Tok("syntax_type", None),
+    Tok("syntax_string", None),
+    Tok("syntax_number", None),
+    Tok("syntax_property", None),
+];
+
 /// Syntax kind, colour, font style and font weight.
 const SYNTAX: &[(&str, Paint, Option<&str>, Option<u16>)] = &[
     ("attribute", Tok("syntax_keyword", None), None, None),
     ("boolean", Tok("syntax_number", None), None, None),
-    ("comment", Tok("muted", None), Some("italic"), None),
+    ("comment", Tok("syntax_comment", None), Some("italic"), None),
     ("comment.doc", Tok("subtext", None), Some("italic"), None),
     ("constant", Tok("syntax_number", None), None, None),
     ("constructor", Tok("syntax_type", None), None, None),
@@ -229,7 +242,7 @@ const SYNTAX: &[(&str, Paint, Option<&str>, Option<u16>)] = &[
     ),
     ("enum", Tok("syntax_type", None), None, None),
     ("function", Tok("syntax_function", None), None, None),
-    ("hint", Tok("muted", None), None, None),
+    ("hint", Tok("syntax_comment", None), None, None),
     ("keyword", Tok("syntax_keyword", None), None, None),
     ("label", Tok("syntax_keyword", None), None, None),
     (
@@ -241,7 +254,12 @@ const SYNTAX: &[(&str, Paint, Option<&str>, Option<u16>)] = &[
     ("link_uri", Tok("emphasis", None), None, None),
     ("number", Tok("syntax_number", None), None, None),
     ("operator", Tok("subtext", None), None, None),
-    ("predictive", Tok("muted", None), Some("italic"), None),
+    (
+        "predictive",
+        Tok("syntax_comment", None),
+        Some("italic"),
+        None,
+    ),
     ("preproc", Tok("syntax_keyword", None), None, None),
     ("primary", Tok("text", None), None, None),
     ("property", Tok("syntax_property", None), None, None),
@@ -292,6 +310,10 @@ pub fn render(tokens: &Tokens) -> String {
         })
         .collect();
     style.insert("players".into(), Value::Array(players));
+    style.insert(
+        "accents".into(),
+        Value::Array(ACCENTS.iter().map(paint).collect()),
+    );
     let syntax: Map<String, Value> = SYNTAX
         .iter()
         .map(|(kind, p, font_style, font_weight)| {
@@ -319,6 +341,7 @@ pub fn usage() -> Vec<&'static str> {
         .iter()
         .map(|(_, p)| p)
         .chain(PLAYERS.iter().flatten().map(|(_, p)| p))
+        .chain(ACCENTS)
         .chain(SYNTAX.iter().map(|(_, p, _, _)| p))
         .filter_map(Paint::token)
         .collect()

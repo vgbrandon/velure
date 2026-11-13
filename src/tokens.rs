@@ -23,6 +23,10 @@ const SYNTAX_CHROMA: f64 = 0.08;
 const SYNTAX_MIN_CHROMA: f64 = 0.06;
 /// Below this OKLab distance two kinds of code read as the same colour.
 const SYNTAX_MIN_DELTA: f64 = 0.05;
+/// APCA contrast that code colours keep against the background. Editors such as Zed
+/// lighten any highlight below Lc 45 on their own (`minimum_contrast_for_highlights`), so
+/// a colour under it would not be the one the token names.
+pub const SYNTAX_MIN_APCA: f64 = 45.0;
 
 /// Minimum WCAG contrast that each `(foreground, background)` pair must reach.
 pub const CONTRAST_RULES: &[(&str, &str, f64)] = &[
@@ -60,6 +64,17 @@ pub const CONTRAST_RULES: &[(&str, &str, f64)] = &[
     ("syntax_property", "bg", 4.5),
 ];
 
+/// Minimum APCA contrast (Lc) for code colours on the background: see `SYNTAX_MIN_APCA`.
+pub const APCA_RULES: &[(&str, &str, f64)] = &[
+    ("syntax_keyword", "bg", SYNTAX_MIN_APCA),
+    ("syntax_function", "bg", SYNTAX_MIN_APCA),
+    ("syntax_type", "bg", SYNTAX_MIN_APCA),
+    ("syntax_string", "bg", SYNTAX_MIN_APCA),
+    ("syntax_number", "bg", SYNTAX_MIN_APCA),
+    ("syntax_property", "bg", SYNTAX_MIN_APCA),
+    ("syntax_comment", "bg", SYNTAX_MIN_APCA),
+];
+
 pub struct Tokens(Vec<(String, Color)>);
 
 impl Tokens {
@@ -83,15 +98,18 @@ impl Tokens {
         self.0.push((name.into(), color));
     }
 
-    /// Every rule of `CONTRAST_RULES` that this set breaks, described for a person.
+    /// Every rule of `CONTRAST_RULES` and `APCA_RULES` that this set breaks, described for
+    /// a person.
     pub fn contrast_failures(&self) -> Vec<String> {
-        CONTRAST_RULES
-            .iter()
-            .filter_map(|(fg, bg, min)| {
-                let ratio = self.get(fg)?.contrast(self.get(bg)?);
-                (ratio < *min).then(|| format!("{fg} sobre {bg}: {ratio:.2} (mín {min})"))
-            })
-            .collect()
+        let wcag = CONTRAST_RULES.iter().filter_map(|(fg, bg, min)| {
+            let ratio = self.get(fg)?.contrast(self.get(bg)?);
+            (ratio < *min).then(|| format!("{fg} sobre {bg}: {ratio:.2} (mín {min})"))
+        });
+        let apca = APCA_RULES.iter().filter_map(|(fg, bg, min)| {
+            let lc = self.get(fg)?.apca(self.get(bg)?);
+            (lc < *min).then(|| format!("{fg} sobre {bg}: Lc {lc:.1} (mín Lc {min})"))
+        });
+        wcag.chain(apca).collect()
     }
 }
 
@@ -170,14 +188,34 @@ fn literal_hues(p: &Palette) -> [f64; 3] {
     [picked[0], picked[1], picked[2]]
 }
 
+/// Whether code in this colour reads on `bg` and an editor will show it as it is.
+fn legible(color: Color, bg: Color) -> bool {
+    color.contrast(bg) >= 4.5 && color.apca(bg) >= SYNTAX_MIN_APCA
+}
+
+/// Moves a colour away from `bg` in lightness, the least needed to reach `SYNTAX_MIN_APCA`.
+fn apca_floor(mut lch: Oklch, bg: Color) -> Oklch {
+    let step = if lch.l >= bg.to_lch().l {
+        0.004
+    } else {
+        -0.004
+    };
+    while (0.0..=1.0).contains(&(lch.l + step)) && lch.to_color().apca(bg) < SYNTAX_MIN_APCA {
+        lch.l += step;
+    }
+    lch
+}
+
 /// Moves a colour the least needed to stay legible and apart from `others`: lightness first,
 /// then hue, so it keeps as much of its origin as it can.
 fn separated(start: Oklch, others: &[Color], bg: Color) -> Color {
+    // Starts from the lightness that reaches the contrast, so a dim accent only moves that far
+    let start = apca_floor(ensure_contrast(start, bg, 4.5), bg);
     for turn in [0.0, 15.0, -15.0, 30.0, -30.0, 45.0, -45.0, 60.0, -60.0] {
         for shift in [0.0, 0.04, -0.04, 0.08, -0.08] {
             let color = lch(start.l + shift, start.c, norm_hue(start.h + turn));
             let apart = others.iter().all(|o| color.delta_e(*o) >= SYNTAX_MIN_DELTA);
-            if apart && color.contrast(bg) >= 4.5 {
+            if apart && legible(color, bg) {
                 return color;
             }
         }
@@ -293,6 +331,11 @@ pub fn derive(p: &Palette) -> Tokens {
     t.push("syntax_string", string);
     t.push("syntax_number", number);
     t.push("syntax_property", property);
+    // Comments: the muted text, raised only as far as an editor needs to show it unchanged.
+    t.push(
+        "syntax_comment",
+        apca_floor(n.muted.to_lch(), n.bg).to_color(),
+    );
 
     for (i, color) in gradient(p).iter().enumerate() {
         t.push(format!("gradient_{i}"), *color);

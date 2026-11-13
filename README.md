@@ -146,9 +146,9 @@ stderr sin detener a las demás.
 
 ### Tokens
 
-Son 57 y cada color tiene un solo nombre. Se añade un token cuando algo lo necesita.
+Son 58 y cada color tiene un solo nombre. Se añade un token cuando algo lo necesita.
 Salen de la paleta auditada y `CONTRAST_RULES` (`src/tokens.rs`) declara el contraste
-mínimo de cada par. En modo claro se invierten las reglas que dependen de la luz: el
+mínimo de cada par; `APCA_RULES`, el del código. En modo claro se invierten las reglas que dependen de la luz: el
 énfasis es casi negro, los contenedores son pálidos y el código y el degradado, más
 oscuros. `velure aplicar` siempre pide la paleta oscura, porque tu escritorio la supone.
 
@@ -167,7 +167,8 @@ oscuros. `velure aplicar` siempre pide la paleta oscura, porque tu escritorio la
 | `ansi_0` a `ansi_15` | Los 16 de la paleta, con el significado de cada color |
 | `syntax_keyword`, `syntax_function`, `syntax_type` | Los acentos con un croma mínimo, para que un tipo no parezca un comentario |
 | `syntax_string`, `syntax_number`, `syntax_property` | Tonos de la imagen lejos de los acentos; si no hay, tonos de reserva |
-| (todos los `syntax_*`) | Separados entre sí y del texto por ΔE OKLab de 0,05 como mínimo |
+| `syntax_comment` | `muted`, aclarado solo lo justo para llegar a Lc 45 |
+| (todos los `syntax_*`) | Separados entre sí y del texto por ΔE OKLab de 0,05 como mínimo, y a Lc 45 (APCA) como mínimo sobre `bg`: por debajo, editores como Zed aclaran el color por su cuenta |
 | `gradient_0` a `gradient_7` | Del lado del terciario al del secundario, a 35° como máximo del primario |
 
 ## Limitaciones
